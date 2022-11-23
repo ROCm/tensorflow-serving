@@ -13,8 +13,8 @@
 # limitations under the License.
 FROM ubuntu:focal as base_build
 
-ARG TF_SERVING_VERSION_GIT_BRANCH=r2.10
-ARG TF_SERVING_VERSION_GIT_COMMIT=f44ac27514625c522bb010e5822b7d276fff986b
+ARG TF_SERVING_VERSION_GIT_BRANCH=r2.11
+ARG TF_SERVING_VERSION_GIT_COMMIT=7c9bd6b224061a9d4e2df8d80100807ba80f8f4b
 
 LABEL maintainer=Jason.Furmanek@amd.com
 LABEL tensorflow_serving_github_branchtag=${TF_SERVING_VERSION_GIT_BRANCH}
@@ -150,7 +150,7 @@ RUN echo "Building with Bazel options: ${TF_SERVING_BAZEL_OPTIONS}"
 
 # Download tensorflow-rocm for org_tensorflow override
 ENV ROCM_TF_FORK_REPO="https://github.com/ROCmSoftwarePlatform/tensorflow-upstream"
-ENV ROCM_TF_FORK_BRANCH="r2.10-rocm-enhanced"
+ENV ROCM_TF_FORK_BRANCH="r2.11-rocm-enhanced"
 RUN rm -rf /tmp/tensorflow-upstream || true && \
     git clone -b ${ROCM_TF_FORK_BRANCH} ${ROCM_TF_FORK_REPO} /tmp/tensorflow-upstream
 
