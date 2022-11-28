@@ -1,0 +1,181 @@
+# Copyright 2018 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#FROM rocm/dev-centos-7:5.3 as base_build
+FROM centos:centos7.9.2009 as base_build
+
+ARG TF_SERVING_VERSION_GIT_BRANCH=master
+ARG TF_SERVING_VERSION_GIT_COMMIT=HEAD
+
+LABEL maintainer=Jason.Furmanek@amd.com
+LABEL tensorflow_serving_github_branchtag=${TF_SERVING_VERSION_GIT_BRANCH}
+LABEL tensorflow_serving_github_commit=${TF_SERVING_VERSION_GIT_COMMIT}
+
+ARG ROCM_ROM_REPO=https://repo.radeon.com/amdgpu/5.3/rhel/7.9/main/x86_64
+ARG ROCM_BUILD_NAME=ubuntu
+ARG ROCM_BUILD_NUM=main
+ARG ROCM_PATH=/opt/rocm-5.3.0
+ARG GPU_DEVICE_TARGETS="gfx900 gfx906 gfx908 gfx90a gfx1030"
+
+ARG DEBIAN_FRONTEND=noninteractive
+ENV TF_NEED_ROCM 1
+ENV HOME /root/
+ENV HIP_PLATFORM=amd
+
+COPY amdgpu.repo /etc/yum.repos.d/
+COPY rocm.repo /etc/yum.repos.d/
+RUN yum install -y epel-release
+RUN yum repolist
+RUN yum clean all
+RUN yum install -y \
+        wget \
+        swig \
+        libtool \
+        automake \
+        curl \
+        unzip \
+        zip \
+        pkg-config \
+        perl-File-BaseDir \
+        perl-URI-Encode \
+        rocm-dev  \
+        rocm-libs \
+        rccl \
+        miopenkernels*
+
+# Add target file to help determine which device(s) to build for
+RUN printf '%s\n' > ${ROCM_PATH}/bin/target.lst ${GPU_DEVICE_TARGETS}
+RUN touch ${ROCM_PATH}/.info/version
+
+# Install devtoolset-9 and various related pkgs
+RUN yum install -y \
+        centos-release-scl \
+        devtoolset-9-gcc* \
+        make \
+        libffi-devel \
+        openssl-devel \
+        zlib-devel \
+        which \
+        git \
+        patch
+ENV PATH=/opt/rh/devtoolset-9/root/usr/bin:$PATH
+RUN source /opt/rh/devtoolset-9/enable && \
+    gcc --version
+
+# Install python 3.7.
+COPY build_and_install_python.sh /install/
+RUN /install/build_and_install_python.sh "3.7.7"
+ENV PATH=/usr/local/bin:$PATH
+RUN python3 -m pip install --user --upgrade pip
+
+RUN ln -fs /usr/local/bin/python3.7 /usr/local/bin/python3
+RUN python3 -m pip install --upgrade pip setuptools wheel
+RUN python3 -m pip install \
+    numpy \
+    portpicker \
+    requests \
+    h5py \
+    mock \
+    keras_applications>=1.0.8 \
+    keras_preprocessing>=1.1.0 \
+    future>=0.17.1 \
+    grpcio \
+     --ignore-installed six>=1.12.0
+
+RUN python3 -m pip list
+
+# Set up Bazel
+ENV BAZEL_VERSION 5.3.0
+WORKDIR /
+RUN mkdir /bazel && \
+    cd /bazel && \
+    curl -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36" -fSsL -O https://github.com/bazelbuild/bazel/releases/download/$BAZEL_VERSION/bazel-$BAZEL_VERSION-installer-linux-x86_64.sh && \
+    curl -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36" -fSsL -o /bazel/LICENSE.txt https://raw.githubusercontent.com/bazelbuild/bazel/master/LICENSE && \
+    chmod +x bazel-*.sh && \
+    ./bazel-$BAZEL_VERSION-installer-linux-x86_64.sh && \
+    cd / && \
+    rm -f /bazel/bazel-$BAZEL_VERSION-installer-linux-x86_64.sh
+
+# Build TensorFlow with the ROCm configuration
+ENV CI_BUILD_PYTHON python3
+
+ENV HCC_HOME=$ROCM_PATH/hcc
+ENV HIP_PATH=$ROCM_PATH/hip
+ENV OPENCL_ROOT=$ROCM_PATH/opencl
+ENV PATH="$HCC_HOME/bin:$HIP_PATH/bin:${PATH}"
+ENV PATH="$ROCM_PATH/bin:${PATH}"
+ENV PATH="$OPENCL_ROOT/bin:${PATH}"
+
+
+# Set TMP for nvidia build environment
+ENV TMP="/tmp"
+
+# Download TF Serving sources (optionally at specific commit).
+WORKDIR /tensorflow-serving
+RUN curl -sSL --retry 5 https://github.com/tensorflow/serving/tarball/${TF_SERVING_VERSION_GIT_COMMIT} | tar --strip-components=1 -xzf -
+
+FROM base_build as binary_build
+# Build, and install TensorFlow Serving
+ARG TF_SERVING_BUILD_OPTIONS="--config=release"
+RUN echo "Building with build options: ${TF_SERVING_BUILD_OPTIONS}"
+ARG TF_SERVING_BAZEL_OPTIONS=""
+RUN echo "Building with Bazel options: ${TF_SERVING_BAZEL_OPTIONS}"
+
+#RUN chmod 777 /opt/rocm-5.3.0/bin/rocm_agent_enumerator
+
+# Download tensorflow-rocm for org_tensorflow override
+ENV ROCM_TF_FORK_REPO="https://github.com/ROCmSoftwarePlatform/tensorflow-upstream"
+ENV ROCM_TF_FORK_BRANCH="develop-upstream"
+RUN rm -rf /tmp/tensorflow-upstream || true && \
+    git clone -b ${ROCM_TF_FORK_BRANCH} ${ROCM_TF_FORK_REPO} /tmp/tensorflow-upstream
+
+RUN bazel build --color=yes --curses=yes --copt="-fPIC"\
+    --override_repository=org_tensorflow=/tmp/tensorflow-upstream \
+    --crosstool_top=@local_config_rocm//crosstool:toolchain \
+    --define=using_rocm_hipcc=true \
+    --define=tensorflow_mkldnn_contraction_kernel=0 \
+    --repo_env TF_NEED_ROCM=1 \
+    ${TF_SERVING_BAZEL_OPTIONS} \
+    --verbose_failures \
+    --output_filter=DONT_MATCH_ANYTHING \
+    --action_env ROCM_PATH=/opt/rocm-5.3.0 \
+    ${TF_SERVING_BUILD_OPTIONS} \
+    tensorflow_serving/model_servers:tensorflow_model_server && \
+    cp bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server \
+    /usr/local/bin/
+
+# Build and install TensorFlow Serving API
+RUN bazel build --color=yes --curses=yes \
+    --override_repository=org_tensorflow=/tmp/tensorflow-upstream \
+    --crosstool_top=@local_config_rocm//crosstool:toolchain \
+    --define=using_rocm_hipcc=true \
+    --define=tensorflow_mkldnn_contraction_kernel=0 \
+    --repo_env TF_NEED_ROCM=1 \
+    ${TF_SERVING_BAZEL_OPTIONS} \
+    --verbose_failures \
+    --output_filter=DONT_MATCH_ANYTHING \
+    --action_env ROCM_PATH=/opt/rocm-5.3.0 \
+    ${TF_SERVING_BUILD_OPTIONS} \
+    tensorflow_serving/tools/pip_package:build_pip_package && \
+    bazel-bin/tensorflow_serving/tools/pip_package/build_pip_package \
+    /tmp/pip && \
+    pip --no-cache-dir install --upgrade \
+    /tmp/pip/tensorflow_serving_api_gpu-*.whl && \
+    rm -rf /tmp/pip
+
+FROM binary_build as clean_build
+# Clean up Bazel cache when done.
+RUN bazel clean --expunge --color=yes && \
+    rm -rf /root/.cache
+CMD ["/bin/bash"]
+
