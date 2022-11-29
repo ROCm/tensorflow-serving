@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#FROM rocm/dev-centos-7:5.3 as base_build
+
 FROM centos:centos7.9.2009 as base_build
 
 ARG TF_SERVING_VERSION_GIT_BRANCH=master
@@ -38,6 +38,7 @@ RUN yum install -y epel-release
 RUN yum repolist
 RUN yum clean all
 RUN yum install -y \
+        ca-certificates \
         wget \
         swig \
         libtool \
@@ -56,6 +57,10 @@ RUN yum install -y \
 # Add target file to help determine which device(s) to build for
 RUN printf '%s\n' > ${ROCM_PATH}/bin/target.lst ${GPU_DEVICE_TARGETS}
 RUN touch ${ROCM_PATH}/.info/version
+
+# Install CentOS SCL release repo
+RUN yum install -y \
+        centos-release-scl
 
 # Install devtoolset-9 and various related pkgs
 RUN yum install -y \
