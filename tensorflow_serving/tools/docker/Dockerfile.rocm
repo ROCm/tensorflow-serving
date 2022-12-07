@@ -26,7 +26,7 @@ LABEL maintainer="Jason.Furmanek@amd.com"
 LABEL tensorflow_serving_github_branchtag=${TF_SERVING_VERSION_GIT_BRANCH}
 LABEL tensorflow_serving_github_commit=${TF_SERVING_VERSION_GIT_COMMIT}
 
-ARG ROCM_DEB_REPO=https://repo.radeon.com/rocm/apt/5.3/
+ARG ROCM_REPO=https://repo.radeon.com/rocm/apt/5.3/
 ARG ROCM_BUILD_NAME=ubuntu
 ARG ROCM_BUILD_NUM=main
 ARG ROCM_PATH=/opt/rocm-5.3.0
@@ -41,10 +41,10 @@ RUN apt-get --allow-unauthenticated update && apt install -y wget software-prope
 # Add rocm repository
 RUN apt-get clean all
 RUN wget -qO - https://repo.radeon.com/rocm/rocm.gpg.key | apt-key add -;
-RUN bin/bash -c 'if [[ $ROCM_DEB_REPO == https://repo.radeon.com/rocm/*  ]] ; then \
-      echo "deb [arch=amd64] $ROCM_DEB_REPO $ROCM_BUILD_NAME $ROCM_BUILD_NUM" > /etc/apt/sources.list.d/rocm.list; \
+RUN bin/bash -c 'if [[ $ROCM_REPO == https://repo.radeon.com/rocm/*  ]] ; then \
+      echo "deb [arch=amd64] $ROCM_REPO $ROCM_BUILD_NAME $ROCM_BUILD_NUM" > /etc/apt/sources.list.d/rocm.list; \
     else \
-      echo "deb [arch=amd64 trusted=yes] $ROCM_DEB_REPO $ROCM_BUILD_NAME $ROCM_BUILD_NUM" > /etc/apt/sources.list.d/rocm.list ; \
+      echo "deb [arch=amd64 trusted=yes] $ROCM_REPO $ROCM_BUILD_NAME $ROCM_BUILD_NUM" > /etc/apt/sources.list.d/rocm.list ; \
     fi'
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
