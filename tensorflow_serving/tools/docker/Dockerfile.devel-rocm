@@ -20,7 +20,7 @@ LABEL maintainer=Jason.Furmanek@amd.com
 LABEL tensorflow_serving_github_branchtag=${TF_SERVING_VERSION_GIT_BRANCH}
 LABEL tensorflow_serving_github_commit=${TF_SERVING_VERSION_GIT_COMMIT}
 
-ARG ROCM_DEB_REPO=https://repo.radeon.com/rocm/apt/5.3/
+ARG ROCM_REPO=https://repo.radeon.com/rocm/apt/5.3/
 ARG ROCM_BUILD_NAME=ubuntu
 ARG ROCM_BUILD_NUM=main
 ARG ROCM_PATH=/opt/rocm-5.3.0
@@ -35,10 +35,10 @@ RUN apt-get --allow-unauthenticated update && apt install -y wget software-prope
 # Add rocm repository
 RUN apt-get clean all
 RUN wget -qO - https://repo.radeon.com/rocm/rocm.gpg.key | apt-key add -;
-RUN bin/bash -c 'if [[ $ROCM_DEB_REPO == https://repo.radeon.com/rocm/*  ]] ; then \
-      echo "deb [arch=amd64] $ROCM_DEB_REPO $ROCM_BUILD_NAME $ROCM_BUILD_NUM" > /etc/apt/sources.list.d/rocm.list; \
+RUN bin/bash -c 'if [[ $ROCM_REPO == https://repo.radeon.com/rocm/*  ]] ; then \
+      echo "deb [arch=amd64] $ROCM_REPO $ROCM_BUILD_NAME $ROCM_BUILD_NUM" > /etc/apt/sources.list.d/rocm.list; \
     else \
-      echo "deb [arch=amd64] $ROCM_DEB_REPO $ROCM_BUILD_NAME $ROCM_BUILD_NUM" > /etc/apt/sources.list.d/rocm.list ; \
+      echo "deb [arch=amd64 trusted=yes] $ROCM_REPO $ROCM_BUILD_NAME $ROCM_BUILD_NUM" > /etc/apt/sources.list.d/rocm.list ; \
     fi'
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -147,6 +147,7 @@ ARG TF_SERVING_BUILD_OPTIONS="--config=release"
 RUN echo "Building with build options: ${TF_SERVING_BUILD_OPTIONS}"
 ARG TF_SERVING_BAZEL_OPTIONS=""
 RUN echo "Building with Bazel options: ${TF_SERVING_BAZEL_OPTIONS}"
+ARG ROCM_PATH=/opt/rocm-5.3.0
 
 # Download tensorflow-rocm for org_tensorflow override
 ENV ROCM_TF_FORK_REPO="https://github.com/ROCmSoftwarePlatform/tensorflow-upstream"
@@ -163,7 +164,7 @@ RUN bazel build --color=yes --curses=yes --copt="-fPIC"\
     ${TF_SERVING_BAZEL_OPTIONS} \
     --verbose_failures \
     --output_filter=DONT_MATCH_ANYTHING \
-    --action_env ROCM_PATH=/opt/rocm-5.3.0 \
+    --action_env ROCM_PATH=${ROCM_PATH} \
     ${TF_SERVING_BUILD_OPTIONS} \
     tensorflow_serving/model_servers:tensorflow_model_server && \
     cp bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server \
@@ -179,7 +180,7 @@ RUN bazel build --color=yes --curses=yes \
     ${TF_SERVING_BAZEL_OPTIONS} \
     --verbose_failures \
     --output_filter=DONT_MATCH_ANYTHING \
-    --action_env ROCM_PATH=/opt/rocm-5.3.0 \
+    --action_env ROCM_PATH=${ROCM_PATH} \
     ${TF_SERVING_BUILD_OPTIONS} \
     tensorflow_serving/tools/pip_package:build_pip_package && \
     bazel-bin/tensorflow_serving/tools/pip_package/build_pip_package \
