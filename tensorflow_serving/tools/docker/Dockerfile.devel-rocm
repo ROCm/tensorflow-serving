@@ -25,6 +25,7 @@ ARG ROCM_BUILD_NAME=ubuntu
 ARG ROCM_BUILD_NUM=main
 ARG ROCM_PATH=/opt/rocm-5.3.0
 ARG GPU_DEVICE_TARGETS="gfx900 gfx906 gfx908 gfx90a gfx1030"
+ARG TF_REPO="https://pypi.org"
 
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TF_NEED_ROCM 1
@@ -190,6 +191,17 @@ RUN ROCM=$(ls -d /opt/rocm-*) && \
     pip --no-cache-dir install --upgrade \
     /tmp/pip/tensorflow_serving_api_gpu-*.whl && \
     rm -rf /tmp/pip
+
+# Remove tensorflow-gpu and add tensorflow-rocm
+ARG TF_REPO="https://pypi.org"
+RUN TF_VERS_SUBSCRIPT=$( \
+                    basename $ROCM_PATH | \
+                    cut -d "-" -f2 | \
+                    tr -d "." || \
+                    true \
+    ) && \
+    pip3 uninstall -y tensorflow-gpu tensorflow-estimator keras keras-nightly && \
+    pip3 install tensorflow-rocm==2.11.0.${TF_VERS_SUBSCRIPT} -f ${TF_REPO}
 
 FROM binary_build as clean_build
 # Clean up Bazel cache when done.
