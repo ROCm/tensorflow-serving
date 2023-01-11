@@ -21,11 +21,12 @@ LABEL maintainer=Jason.Furmanek@amd.com
 LABEL tensorflow_serving_github_branchtag=${TF_SERVING_VERSION_GIT_BRANCH}
 LABEL tensorflow_serving_github_commit=${TF_SERVING_VERSION_GIT_COMMIT}
 
-ARG ROCM_REPO=https://repo.radeon.com/amdgpu/5.3/rhel/7.9/main/x86_64
+ARG ROCM_REPO=https://repo.radeon.com/amdgpu/5.4/rhel/7.9/main/x86_64
 ARG ROCM_BUILD_NAME=ubuntu
 ARG ROCM_BUILD_NUM=main
-ARG ROCM_PATH=/opt/rocm-5.3.0
+ARG ROCM_PATH=/opt/rocm-5.4.0
 ARG GPU_DEVICE_TARGETS="gfx900 gfx906 gfx908 gfx90a gfx1030"
+ARG TF_REPO="https://pypi.org"
 
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TF_NEED_ROCM 1
@@ -135,9 +136,7 @@ ARG TF_SERVING_BUILD_OPTIONS="--config=release"
 RUN echo "Building with build options: ${TF_SERVING_BUILD_OPTIONS}"
 ARG TF_SERVING_BAZEL_OPTIONS=""
 RUN echo "Building with Bazel options: ${TF_SERVING_BAZEL_OPTIONS}"
-ARG ROCM_PATH=/opt/rocm-5.3.0
-
-#RUN chmod 777 /opt/rocm-5.3.0/bin/rocm_agent_enumerator
+ARG ROCM_PATH=/opt/rocm-5.4.0
 
 # Download tensorflow-rocm for org_tensorflow override
 ENV ROCM_TF_FORK_REPO="https://github.com/ROCmSoftwarePlatform/tensorflow-upstream"
@@ -180,6 +179,17 @@ RUN ROCM=$(ls -d /opt/rocm-*) && \
     pip --no-cache-dir install --upgrade \
     /tmp/pip/tensorflow_serving_api_gpu-*.whl && \
     rm -rf /tmp/pip
+
+# Remove tensorflow-gpu and add tensorflow-rocm
+ARG TF_REPO="https://pypi.org"
+RUN TF_VERS_SUBSCRIPT=$( \
+                    basename $ROCM_PATH | \
+                    cut -d "-" -f2 | \
+                    tr -d "." || \
+                    true \
+    ) && \
+    python3 -m pip uninstall -y tensorflow-gpu tensorflow-estimator keras keras-nightly && \
+    python3 -m pip install tensorflow-rocm==2.11.0.${TF_VERS_SUBSCRIPT} -f ${TF_REPO}
 
 FROM binary_build as clean_build
 # Clean up Bazel cache when done.
