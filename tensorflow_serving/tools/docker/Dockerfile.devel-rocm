@@ -203,7 +203,7 @@ RUN TF_VERS_SUBSCRIPT=$( \
                     true \
     ) && \
     pip3 uninstall -y tensorflow-gpu tensorflow-estimator keras keras-nightly && \
-    python3 -m pip install tensorflow-rocm==${TF_VERS_TO_POST_INSTALL}.${TF_VERS_SUBSCRIPT} -f ${TF_REPO} || true
+    pip3 install tensorflow-rocm==${TF_VERS_TO_POST_INSTALL}.${TF_VERS_SUBSCRIPT} -f ${TF_REPO} || true
 
 FROM binary_build as clean_build
 # Clean up Bazel cache when done.
