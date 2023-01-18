@@ -195,7 +195,7 @@ RUN ROCM=$(ls -d /opt/rocm-*) && \
     rm -rf /tmp/pip
 
 # Remove tensorflow-gpu and add tensorflow-rocm
-ARG INST_TF_ROCM_WHL_SCRIPT
+ARG INST_TF_ROCM_WHL_SCRIPT='install_tf_rocm_whl.bash'
 COPY ./${INST_TF_ROCM_WHL_SCRIPT} /tmp/${INST_TF_ROCM_WHL_SCRIPT}
 RUN bash /tmp/${INST_TF_ROCM_WHL_SCRIPT} && rm /tmp/${INST_TF_ROCM_WHL_SCRIPT}
 
