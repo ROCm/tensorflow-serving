@@ -28,6 +28,7 @@ ARG ROCM_PATH=/opt/rocm-5.4.0
 ARG GPU_DEVICE_TARGETS="gfx900 gfx906 gfx908 gfx90a gfx1030"
 ARG TF_REPO="https://pypi.org"
 ARG TF_VERS_TO_POST_INSTALL="2.11.0"
+ARG PYTHON_VERS="3.7.7"
 
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TF_NEED_ROCM 1
@@ -79,13 +80,13 @@ ENV PATH=/opt/rh/devtoolset-9/root/usr/bin:$PATH
 RUN source /opt/rh/devtoolset-9/enable && \
     gcc --version
 
-# Install python 3.7.
+# Install python
 COPY build_and_install_python.sh /install/
-RUN /install/build_and_install_python.sh "3.7.7"
+RUN /install/build_and_install_python.sh ${PYTHON_VERS}
 ENV PATH=/usr/local/bin:$PATH
 RUN python3 -m pip install --user --upgrade pip
 
-RUN ln -fs /usr/local/bin/python3.7 /usr/local/bin/python3
+RUN PY_VERS_SHORT=${PYTHON_VERS} | cut -d . -f 1,2 &&  ln -fs /usr/local/bin/python${PY_VERS_SHORT} /usr/local/bin/python3
 RUN python3 -m pip install --upgrade pip setuptools wheel
 RUN python3 -m pip install \
     numpy \
