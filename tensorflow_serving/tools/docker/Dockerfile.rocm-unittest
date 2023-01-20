@@ -26,7 +26,6 @@ ARG ROCM_BUILD_NUM=main
 ARG ROCM_PATH=/opt/rocm-5.4.0
 ARG GPU_DEVICE_TARGETS="gfx900 gfx906 gfx908 gfx90a gfx1030"
 ARG TF_REPO="https://pypi.org"
-ARG TF_VERS_TO_POST_INSTALL="nightly"
 ARG PYTHON_VERS="3.7"
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -41,7 +40,7 @@ RUN wget -qO - https://repo.radeon.com/rocm/rocm.gpg.key | apt-key add -;
 RUN bin/bash -c 'if [[ $ROCM_REPO == https://repo.radeon.com/rocm/*  ]] ; then \
       echo "deb [arch=amd64] $ROCM_REPO $ROCM_BUILD_NAME $ROCM_BUILD_NUM" > /etc/apt/sources.list.d/rocm.list; \
     else \
-      echo "deb [arch=amd64] $ROCM_REPO $ROCM_BUILD_NAME $ROCM_BUILD_NUM" > /etc/apt/sources.list.d/rocm.list ; \
+      echo "deb [arch=amd64 trusted=yes] $ROCM_REPO $ROCM_BUILD_NAME $ROCM_BUILD_NUM" > /etc/apt/sources.list.d/rocm.list ; \
     fi'
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -146,7 +145,7 @@ RUN curl -sSL --retry 5 https://github.com/tensorflow/serving/tarball/${TF_SERVI
 
 FROM base_build as binary_build
 # Build, and install TensorFlow Serving
-ARG TF_SERVING_BUILD_OPTIONS="--config=release"
+ARG TF_SERVING_BUILD_OPTIONS=""
 RUN echo "Building with build options: ${TF_SERVING_BUILD_OPTIONS}"
 ARG TF_SERVING_BAZEL_OPTIONS=""
 RUN echo "Building with Bazel options: ${TF_SERVING_BAZEL_OPTIONS}"
@@ -154,12 +153,12 @@ ARG ROCM_PATH=/opt/rocm-5.4.0
 
 # Download tensorflow-rocm for org_tensorflow override
 ENV ROCM_TF_FORK_REPO="https://github.com/ROCmSoftwarePlatform/tensorflow-upstream"
-ENV ROCM_TF_FORK_BRANCH="develop-upstream"
+ENV ROCM_TF_FORK_BRANCH="r2.11-rocm-enhanced"
 RUN rm -rf /tmp/tensorflow-upstream || true && \
     git clone -b ${ROCM_TF_FORK_BRANCH} ${ROCM_TF_FORK_REPO} /tmp/tensorflow-upstream
 
 RUN ROCM=$(ls -d /opt/rocm-*) && \
-    bazel build --color=yes --curses=yes --copt="-fPIC"\
+    bazel test --color=yes --curses=yes --copt="-fPIC"\
     --override_repository=org_tensorflow=/tmp/tensorflow-upstream \
     --crosstool_top=@local_config_rocm//crosstool:toolchain \
     --define=using_rocm_hipcc=true \
@@ -170,29 +169,11 @@ RUN ROCM=$(ls -d /opt/rocm-*) && \
     --output_filter=DONT_MATCH_ANYTHING \
     --action_env ROCM_PATH=$ROCM \
     ${TF_SERVING_BUILD_OPTIONS} \
-    tensorflow_serving/model_servers:tensorflow_model_server && \
-    cp bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server \
-    /usr/local/bin/
-
-# Build and install TensorFlow Serving API
-RUN ROCM=$(ls -d /opt/rocm-*) && \
-    bazel build --color=yes --curses=yes \
-    --override_repository=org_tensorflow=/tmp/tensorflow-upstream \
-    --crosstool_top=@local_config_rocm//crosstool:toolchain \
-    --define=using_rocm_hipcc=true \
-    --define=tensorflow_mkldnn_contraction_kernel=0 \
-    --repo_env TF_NEED_ROCM=1 \
-    ${TF_SERVING_BAZEL_OPTIONS} \
-    --verbose_failures \
-    --output_filter=DONT_MATCH_ANYTHING \
-    --action_env ROCM_PATH=$ROCM \
-    ${TF_SERVING_BUILD_OPTIONS} \
-    tensorflow_serving/tools/pip_package:build_pip_package && \
-    bazel-bin/tensorflow_serving/tools/pip_package/build_pip_package \
-    /tmp/pip && \
-    pip --no-cache-dir install --upgrade \
-    /tmp/pip/tensorflow_serving_api_gpu-*.whl && \
-    rm -rf /tmp/pip
+    --flaky_test_attempts=3 \
+    --test_size_filters=small,medium \
+    --test_timeout=920,2400,7200,9600 \
+    --test_summary=short \
+    tensorflow_serving/...
 
 FROM binary_build as clean_build
 # Clean up Bazel cache when done.
