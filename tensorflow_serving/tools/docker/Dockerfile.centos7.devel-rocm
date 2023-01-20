@@ -132,7 +132,13 @@ ENV TMP="/tmp"
 WORKDIR /tensorflow-serving
 RUN curl -sSL --retry 5 https://github.com/tensorflow/serving/tarball/${TF_SERVING_VERSION_GIT_COMMIT} | tar --strip-components=1 -xzf -
 
+
+
 FROM base_build as binary_build
+
+ARG ROCM_BUILD_NAME=ubuntu
+ARG ROCM_BUILD_NUM=main
+
 # Build, and install TensorFlow Serving
 ARG TF_SERVING_BUILD_OPTIONS="--config=release"
 RUN echo "Building with build options: ${TF_SERVING_BUILD_OPTIONS}"
@@ -183,9 +189,11 @@ RUN ROCM=$(ls -d /opt/rocm-*) && \
     rm -rf /tmp/pip
 
 # Remove tensorflow-gpu and add tensorflow-rocm
-ARG INST_TF_ROCM_WHL_SCRIPT
+ARG INST_TF_ROCM_WHL_SCRIPT='install_tf_rocm_whl.bash'
 COPY ./${INST_TF_ROCM_WHL_SCRIPT} /tmp/${INST_TF_ROCM_WHL_SCRIPT}
 RUN bash /tmp/${INST_TF_ROCM_WHL_SCRIPT} && rm /tmp/${INST_TF_ROCM_WHL_SCRIPT}
+
+
 
 FROM binary_build as clean_build
 # Clean up Bazel cache when done.
