@@ -86,7 +86,7 @@ RUN /install/build_and_install_python.sh ${PYTHON_VERS}
 ENV PATH=/usr/local/bin:$PATH
 RUN python3 -m pip install --user --upgrade pip
 
-RUN PY_VERS_SHORT=${PYTHON_VERS} | cut -d . -f 1,2 &&  ln -fs /usr/local/bin/python${PY_VERS_SHORT} /usr/local/bin/python3
+RUN update-alternatives --install /usr/bin/python3 python /usr/local/bin/python${PYTHON_VERS%.*} 1
 RUN python3 -m pip install --upgrade pip setuptools wheel
 RUN python3 -m pip install \
     numpy \
