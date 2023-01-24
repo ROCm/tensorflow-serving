@@ -41,7 +41,7 @@ RUN wget -qO - https://repo.radeon.com/rocm/rocm.gpg.key | apt-key add -;
 RUN bin/bash -c 'if [[ $ROCM_REPO == https://repo.radeon.com/rocm/*  ]] ; then \
       echo "deb [arch=amd64] $ROCM_REPO $ROCM_BUILD_NAME $ROCM_BUILD_NUM" > /etc/apt/sources.list.d/rocm.list; \
     else \
-      echo "deb [arch=amd64] $ROCM_REPO $ROCM_BUILD_NAME $ROCM_BUILD_NUM" > /etc/apt/sources.list.d/rocm.list ; \
+      echo "deb [arch=amd64 trusted=yes] $ROCM_REPO $ROCM_BUILD_NAME $ROCM_BUILD_NUM" > /etc/apt/sources.list.d/rocm.list ; \
     fi'
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
