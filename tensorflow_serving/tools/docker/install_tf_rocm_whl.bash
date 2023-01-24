@@ -9,4 +9,4 @@ TF_VERS_SUBSCRIPT=$( \
     ) && \
     pip3 uninstall -y tensorflow-gpu tensorflow-estimator keras keras-nightly && \
     pip3 install tensorflow-rocm==2.10.1.${TF_VERS_SUBSCRIPT} -f ${TF_REPO} || \
-        echo "tensorflow-rocm is not installed correctly" && exit 2
+        (echo "tensorflow-rocm is not installed correctly" && exit 2)
