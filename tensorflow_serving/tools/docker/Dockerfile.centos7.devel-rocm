@@ -14,8 +14,8 @@
 
 FROM centos:centos7.9.2009 as base_build
 
-ARG TF_SERVING_VERSION_GIT_BRANCH=master
-ARG TF_SERVING_VERSION_GIT_COMMIT=HEAD
+ARG TF_SERVING_VERSION_GIT_BRANCH=master-QA-stable
+ARG TF_SERVING_VERSION_GIT_COMMIT=50378694649f37bf632bd5f695d913d4339de93c
 
 LABEL maintainer=Jason.Furmanek@amd.com
 LABEL tensorflow_serving_github_branchtag=${TF_SERVING_VERSION_GIT_BRANCH}
@@ -142,9 +142,15 @@ ARG ROCM_PATH=/opt/rocm-5.4.0
 
 # Download tensorflow-rocm for org_tensorflow override
 ENV ROCM_TF_FORK_REPO="https://github.com/ROCmSoftwarePlatform/tensorflow-upstream"
-ENV ROCM_TF_FORK_BRANCH="develop-upstream"
+ENV ROCM_TF_FORK_COMMIT="0730a3df261b187cb6a0d3e64c8461ff02e19db7"
 RUN rm -rf /tmp/tensorflow-upstream || true && \
-    git clone -b ${ROCM_TF_FORK_BRANCH} ${ROCM_TF_FORK_REPO} /tmp/tensorflow-upstream
+    mkdir /tmp/tensorflow-upstream && \
+    cd /tmp/tensorflow-upstream && \
+    git init . && \
+    git remote add origin ${ROCM_TF_FORK_REPO} && \
+    git fetch origin ${ROCM_TF_FORK_COMMIT} && \
+    git reset --hard FETCH_HEAD && \
+    cd -
 
 RUN ROCM=$(ls -d /opt/rocm-*) && \
     bazel build --color=yes --curses=yes --copt="-fPIC"\
