@@ -142,15 +142,9 @@ ARG ROCM_PATH=/opt/rocm-5.4.0
 
 # Download tensorflow-rocm for org_tensorflow override
 ENV ROCM_TF_FORK_REPO="https://github.com/ROCmSoftwarePlatform/tensorflow-upstream"
-ENV ROCM_TF_FORK_COMMIT="0730a3df261b187cb6a0d3e64c8461ff02e19db7"
+ENV ROCM_TF_FORK_BRANCH="develop-upstream-QA-rocm55"
 RUN rm -rf /tmp/tensorflow-upstream || true && \
-    mkdir /tmp/tensorflow-upstream && \
-    cd /tmp/tensorflow-upstream && \
-    git init . && \
-    git remote add origin ${ROCM_TF_FORK_REPO} && \
-    git fetch origin ${ROCM_TF_FORK_COMMIT} && \
-    git reset --hard FETCH_HEAD && \
-    cd -
+    git clone -b ${ROCM_TF_FORK_BRANCH} ${ROCM_TF_FORK_REPO} /tmp/tensorflow-upstream
 
 RUN ROCM=$(ls -d /opt/rocm-*) && \
     bazel build --color=yes --curses=yes --copt="-fPIC"\
