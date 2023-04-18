@@ -1,7 +1,7 @@
 #!/bin/bash
 
 TF_REPO="https://pypi.org"
-TF_VERS_TO_POST_INSTALL="2.11.0"
+TF_VERS_TO_POST_INSTALL="2.12.0"
 TF_VERS_SUBSCRIPT=$( \
                     basename $ROCM_PATH | \
                     cut -d "-" -f2 | \

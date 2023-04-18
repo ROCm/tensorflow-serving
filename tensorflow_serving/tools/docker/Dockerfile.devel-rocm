@@ -13,8 +13,9 @@
 # limitations under the License.
 FROM ubuntu:focal as base_build
 
-ARG TF_SERVING_VERSION_GIT_BRANCH=r2.11
-ARG TF_SERVING_VERSION_GIT_COMMIT=7c9bd6b224061a9d4e2df8d80100807ba80f8f4b
+# TF-serving 2.12 pre-GA
+ARG TF_SERVING_VERSION_GIT_BRANCH=r2.12
+ARG TF_SERVING_VERSION_GIT_COMMIT=58f8e20fa29e2b5ba3dad3047e4fe1493f63924b
 
 LABEL maintainer=Jason.Furmanek@amd.com
 LABEL tensorflow_serving_github_branchtag=${TF_SERVING_VERSION_GIT_BRANCH}
@@ -26,7 +27,7 @@ ARG ROCM_BUILD_NUM=main
 ARG ROCM_PATH=/opt/rocm-5.4.0
 ARG GPU_DEVICE_TARGETS="gfx900 gfx906 gfx908 gfx90a gfx1030"
 ARG TF_REPO="https://pypi.org"
-ARG TF_VERS_TO_POST_INSTALL="2.11.0"
+ARG TF_VERS_TO_POST_INSTALL="2.12.0"
 ARG PYTHON_VERS="3.9"
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -143,8 +144,8 @@ ENV TMP="/tmp"
 # Download TF Serving sources (optionally at specific commit).
 WORKDIR /tensorflow-serving
 RUN curl -sSL --retry 5 https://github.com/tensorflow/serving/tarball/${TF_SERVING_VERSION_GIT_COMMIT} | tar --strip-components=1 -xzf -
-COPY serving.patch001 /tensorflow-serving
-RUN patch -p1 < serving.patch001
+#COPY serving.patch001 /tensorflow-serving
+#RUN patch -p1 < serving.patch001
 
 
 
@@ -161,7 +162,7 @@ ARG ROCM_PATH=/opt/rocm-5.4.0
 
 # Download tensorflow-rocm for org_tensorflow override
 ENV ROCM_TF_FORK_REPO="https://github.com/ROCmSoftwarePlatform/tensorflow-upstream"
-ENV ROCM_TF_FORK_BRANCH="r2.11-rocm-enhanced"
+ENV ROCM_TF_FORK_BRANCH="r2.12-rocm-enhanced"
 RUN rm -rf /tmp/tensorflow-upstream || true && \
     git clone -b ${ROCM_TF_FORK_BRANCH} ${ROCM_TF_FORK_REPO} /tmp/tensorflow-upstream
 
@@ -204,7 +205,7 @@ RUN ROCM=$(ls -d /opt/rocm-*) && \
 # Remove tensorflow-gpu and add tensorflow-rocm
 ARG INST_TF_ROCM_WHL_SCRIPT='install_tf_rocm_whl.bash'
 COPY ./${INST_TF_ROCM_WHL_SCRIPT} /tmp/${INST_TF_ROCM_WHL_SCRIPT}
-RUN bash /tmp/${INST_TF_ROCM_WHL_SCRIPT} && rm /tmp/${INST_TF_ROCM_WHL_SCRIPT}
+#RUN bash /tmp/${INST_TF_ROCM_WHL_SCRIPT} && rm /tmp/${INST_TF_ROCM_WHL_SCRIPT}
 
 
 
