@@ -161,7 +161,7 @@ ARG ROCM_PATH=/opt/rocm-5.4.0
 
 # Download tensorflow-rocm for org_tensorflow override
 ENV ROCM_TF_FORK_REPO="https://github.com/ROCmSoftwarePlatform/tensorflow-upstream"
-ENV ROCM_TF_FORK_BRANCH="r2.11-rocm-enhanced"
+ENV ROCM_TF_FORK_BRANCH="r2.11-rocm-enhanced_argmax"
 RUN rm -rf /tmp/tensorflow-upstream || true && \
     git clone -b ${ROCM_TF_FORK_BRANCH} ${ROCM_TF_FORK_REPO} /tmp/tensorflow-upstream
 
