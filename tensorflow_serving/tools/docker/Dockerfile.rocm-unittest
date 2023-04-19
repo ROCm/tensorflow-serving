@@ -13,8 +13,8 @@
 # limitations under the License.
 FROM ubuntu:focal as base_build
 
-ARG TF_SERVING_VERSION_GIT_BRANCH=master
-ARG TF_SERVING_VERSION_GIT_COMMIT=HEAD
+ARG TF_SERVING_VERSION_GIT_BRANCH=master-QA-stable-rocm56
+ARG TF_SERVING_VERSION_GIT_COMMIT=146b2daa9d5d1d3abdfc9d83b8d0e932a83047fc
 
 LABEL maintainer=Jason.Furmanek@amd.com
 LABEL tensorflow_serving_github_branchtag=${TF_SERVING_VERSION_GIT_BRANCH}
@@ -153,7 +153,7 @@ ARG ROCM_PATH=/opt/rocm-5.4.0
 
 # Download tensorflow-rocm for org_tensorflow override
 ENV ROCM_TF_FORK_REPO="https://github.com/ROCmSoftwarePlatform/tensorflow-upstream"
-ENV ROCM_TF_FORK_BRANCH="develop-upstream"
+ENV ROCM_TF_FORK_BRANCH="develop-upstream-QA-rocm55"
 RUN rm -rf /tmp/tensorflow-upstream || true && \
     git clone -b ${ROCM_TF_FORK_BRANCH} ${ROCM_TF_FORK_REPO} /tmp/tensorflow-upstream
 
