@@ -15,7 +15,7 @@
 FROM centos:centos7.9.2009 as base_build
 
 ARG TF_SERVING_VERSION_GIT_BRANCH=master-QA-stable-rocm56
-ARG TF_SERVING_VERSION_GIT_COMMIT=146b2daa9d5d1d3abdfc9d83b8d0e932a83047fc
+ARG TF_SERVING_VERSION_GIT_COMMIT=c317dcc9987c5cf1e3d0cde81e3ab3767167c487
 
 LABEL maintainer=Jason.Furmanek@amd.com
 LABEL tensorflow_serving_github_branchtag=${TF_SERVING_VERSION_GIT_BRANCH}
