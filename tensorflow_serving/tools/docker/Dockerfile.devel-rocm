@@ -15,7 +15,7 @@ FROM ubuntu:focal as base_build
 
 # TF-serving 2.12 pre-GA
 ARG TF_SERVING_VERSION_GIT_BRANCH=r2.12
-ARG TF_SERVING_VERSION_GIT_COMMIT=58f8e20fa29e2b5ba3dad3047e4fe1493f63924b
+ARG TF_SERVING_VERSION_GIT_COMMIT=962aae1fd77f241021a9db608e9cbafc5203f39e
 
 LABEL maintainer=Jason.Furmanek@amd.com
 LABEL tensorflow_serving_github_branchtag=${TF_SERVING_VERSION_GIT_BRANCH}
@@ -144,8 +144,8 @@ ENV TMP="/tmp"
 # Download TF Serving sources (optionally at specific commit).
 WORKDIR /tensorflow-serving
 RUN curl -sSL --retry 5 https://github.com/tensorflow/serving/tarball/${TF_SERVING_VERSION_GIT_COMMIT} | tar --strip-components=1 -xzf -
-#COPY serving.patch001 /tensorflow-serving
-#RUN patch -p1 < serving.patch001
+COPY serving.patch001 /tensorflow-serving
+RUN patch -p1 < serving.patch001
 
 
 
