@@ -1,22 +1,25 @@
+From 796db131223e3cb4cce5cb27c378a44f59b498da Mon Sep 17 00:00:00 2001
+From: Jason Furmanek <Jason.Furmanek@amd.com>
+Date: Fri, 30 Jun 2023 20:46:32 -0700
+Subject: [PATCH] patch
+
+---
+ tensorflow_serving/tools/pip_package/setup.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
 diff --git a/tensorflow_serving/tools/pip_package/setup.py b/tensorflow_serving/tools/pip_package/setup.py
-index fabcda28..259f1bcf 100644
+index 3d26c43c..1966eb99 100644
 --- a/tensorflow_serving/tools/pip_package/setup.py
 +++ b/tensorflow_serving/tools/pip_package/setup.py
 @@ -33,7 +33,7 @@ DOCLINES = __doc__.split('\n')
  # Set when releasing a new version of TensorFlow Serving (e.g. 1.0.0).
- _VERSION = '2.12.0'
+ _VERSION = '2.13.0-rc0'
  # Have this by default be open; releasing a new version will lock to TF version
--_TF_VERSION = '>=2.12.0,<3'
-+_TF_VERSION = '>=2.12.0,<2.13.0'
+-_TF_VERSION = '>=2.13.0-rc0,<3'
++_TF_VERSION = '>=2.13.0-rc0,<2.14.0'
  _TF_VERSION_SANITIZED = _TF_VERSION.replace('-', '')
  
  project_name = 'tensorflow-serving-api'
-@@ -63,7 +63,7 @@ REQUIRED_PACKAGES = [
-     # Match versions to what TF needs here:
-     #   https://github.com/tensorflow/tensorflow/blob/master/tensorflow/tools/pip_package/setup.py
-     'grpcio >= 1.24.3, < 2.0',
--    'protobuf >= 3.9.2, < 3.20',
-+    'protobuf >= 3.9.2, <= 3.20.3',
- ] + _TF_REQ
- 
- setup(
+-- 
+2.25.1
+
