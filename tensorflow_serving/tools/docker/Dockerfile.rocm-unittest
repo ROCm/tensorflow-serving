@@ -13,17 +13,17 @@
 # limitations under the License.
 FROM ubuntu:focal as base_build
 
-ARG TF_SERVING_VERSION_GIT_BRANCH=master-QA-stable-rocm56
-ARG TF_SERVING_VERSION_GIT_COMMIT=c317dcc9987c5cf1e3d0cde81e3ab3767167c487
+ARG TF_SERVING_VERSION_GIT_BRANCH=master-QA-stable-rocm57
+ARG TF_SERVING_VERSION_GIT_COMMIT=75da213051aa1ddc8ce5f3fbeaa047f7e01ee0a1
 
 LABEL maintainer=Jason.Furmanek@amd.com
 LABEL tensorflow_serving_github_branchtag=${TF_SERVING_VERSION_GIT_BRANCH}
 LABEL tensorflow_serving_github_commit=${TF_SERVING_VERSION_GIT_COMMIT}
 
-ARG ROCM_REPO=https://repo.radeon.com/rocm/apt/5.4/
+ARG ROCM_REPO=https://repo.radeon.com/rocm/apt/5.6/
 ARG ROCM_BUILD_NAME=ubuntu
 ARG ROCM_BUILD_NUM=main
-ARG ROCM_PATH=/opt/rocm-5.4.0
+ARG ROCM_PATH=/opt/rocm-5.6.0
 ARG GPU_DEVICE_TARGETS="gfx900 gfx906 gfx908 gfx90a gfx1030"
 ARG TF_REPO="https://pypi.org"
 ARG PYTHON_VERS="3.9"
@@ -149,11 +149,11 @@ ARG TF_SERVING_BUILD_OPTIONS=""
 RUN echo "Building with build options: ${TF_SERVING_BUILD_OPTIONS}"
 ARG TF_SERVING_BAZEL_OPTIONS=""
 RUN echo "Building with Bazel options: ${TF_SERVING_BAZEL_OPTIONS}"
-ARG ROCM_PATH=/opt/rocm-5.4.0
+ARG ROCM_PATH=/opt/rocm-5.6.0
 
 # Download tensorflow-rocm for org_tensorflow override
 ENV ROCM_TF_FORK_REPO="https://github.com/ROCmSoftwarePlatform/tensorflow-upstream"
-ENV ROCM_TF_FORK_BRANCH="develop-upstream-QA-rocm55"
+ENV ROCM_TF_FORK_BRANCH="develop-upstream-QA-rocm57"
 RUN rm -rf /tmp/tensorflow-upstream || true && \
     git clone -b ${ROCM_TF_FORK_BRANCH} ${ROCM_TF_FORK_REPO} /tmp/tensorflow-upstream
 
