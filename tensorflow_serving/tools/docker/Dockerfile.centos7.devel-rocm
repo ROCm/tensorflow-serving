@@ -14,9 +14,9 @@
 
 FROM centos:centos7.9.2009 as base_build
 
-# TF-serving 2.13 pre-GA
-ARG TF_SERVING_VERSION_GIT_BRANCH=r2.13
-ARG TF_SERVING_VERSION_GIT_COMMIT=83c949cd1c997ada425ac2e30510884f16f62b62
+# TF-serving 2.14 pre-GA
+ARG TF_SERVING_VERSION_GIT_BRANCH=r2.14
+ARG TF_SERVING_VERSION_GIT_COMMIT=2a498bad6532d788afd5c2995362bf0a0b129db3
 
 LABEL maintainer=Jason.Furmanek@amd.com
 LABEL tensorflow_serving_github_branchtag=${TF_SERVING_VERSION_GIT_BRANCH}
@@ -28,7 +28,7 @@ ARG ROCM_BUILD_NUM=main
 ARG ROCM_PATH=/opt/rocm-5.7.0
 ARG GPU_DEVICE_TARGETS="gfx900 gfx906 gfx908 gfx90a gfx1030"
 ARG TF_REPO="https://pypi.org"
-ARG TF_VERS_TO_POST_INSTALL="2.13.0"
+ARG TF_VERS_TO_POST_INSTALL="2.14.0"
 ARG PYTHON_VERS="3.9.9"
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -151,7 +151,7 @@ ARG ROCM_PATH=/opt/rocm-5.7.0
 
 # Download tensorflow-rocm for org_tensorflow override
 ENV ROCM_TF_FORK_REPO="https://github.com/ROCmSoftwarePlatform/tensorflow-upstream"
-ENV ROCM_TF_FORK_BRANCH="r2.13-rocm-enhanced"
+ENV ROCM_TF_FORK_BRANCH="r2.14-rocm-enhanced"
 RUN rm -rf /tmp/tensorflow-upstream || true && \
     git clone -b ${ROCM_TF_FORK_BRANCH} ${ROCM_TF_FORK_REPO} /tmp/tensorflow-upstream
 

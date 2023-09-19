@@ -1,6 +1,6 @@
-From 47a6959548a7496fd3a2f2b0a73d93263b34a90d Mon Sep 17 00:00:00 2001
+From 9cf82661c9fd38311ca2e5544f78128f3c938606 Mon Sep 17 00:00:00 2001
 From: Jason Furmanek <Jason.Furmanek@amd.com>
-Date: Tue, 19 Sep 2023 13:21:30 +0000
+Date: Tue, 19 Sep 2023 13:38:09 +0000
 Subject: [PATCH] patch
 
 ---
@@ -8,15 +8,15 @@ Subject: [PATCH] patch
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/tensorflow_serving/tools/pip_package/setup.py b/tensorflow_serving/tools/pip_package/setup.py
-index 8071c8af..a11a6d30 100644
+index a8c3bc91..b1af27fc 100644
 --- a/tensorflow_serving/tools/pip_package/setup.py
 +++ b/tensorflow_serving/tools/pip_package/setup.py
 @@ -33,7 +33,7 @@ DOCLINES = __doc__.split('\n')
  # Set when releasing a new version of TensorFlow Serving (e.g. 1.0.0).
- _VERSION = '2.13.0'
+ _VERSION = '2.14.0-rc0'
  # Have this by default be open; releasing a new version will lock to TF version
--_TF_VERSION = '>=2.13.0,<3'
-+_TF_VERSION = '>=2.13.0,<2.14.0'
+-_TF_VERSION = '>=2.14.0-rc0,<3'
++_TF_VERSION = '>=2.14.0-rc0,<2.15.0'
  _TF_VERSION_SANITIZED = _TF_VERSION.replace('-', '')
  
  project_name = 'tensorflow-serving-api'
