@@ -16,7 +16,7 @@ FROM centos:centos7.9.2009 as base_build
 
 # TF-serving 2.13 pre-GA
 ARG TF_SERVING_VERSION_GIT_BRANCH=r2.13
-ARG TF_SERVING_VERSION_GIT_COMMIT=f449ae3dc99bfd19a3e9dbfa213c8553222382e2
+ARG TF_SERVING_VERSION_GIT_COMMIT=83c949cd1c997ada425ac2e30510884f16f62b62
 
 LABEL maintainer=Jason.Furmanek@amd.com
 LABEL tensorflow_serving_github_branchtag=${TF_SERVING_VERSION_GIT_BRANCH}
