@@ -18,18 +18,18 @@ ARG TF_SERVING_BUILD_IMAGE=rocm/tensorflow-serving:${TF_SERVING_VERSION}-devel
 FROM ${TF_SERVING_BUILD_IMAGE} as build_image
 FROM ubuntu:20.04
 
-ARG TF_SERVING_VERSION_GIT_BRANCH=master-QA-stable-rocm57
-ARG TF_SERVING_VERSION_GIT_COMMIT=75da213051aa1ddc8ce5f3fbeaa047f7e01ee0a1
+ARG TF_SERVING_VERSION_GIT_BRANCH=master-QA-stable-rocm60
+ARG TF_SERVING_VERSION_GIT_COMMIT=c4baf862f6d44e421fd25cb043755375377eddff
 ARG DEBIAN_FRONTEND=noninteractive
 
 LABEL maintainer="Jason.Furmanek@amd.com"
 LABEL tensorflow_serving_github_branchtag=${TF_SERVING_VERSION_GIT_BRANCH}
 LABEL tensorflow_serving_github_commit=${TF_SERVING_VERSION_GIT_COMMIT}
 
-ARG ROCM_DEB_REPO=https://repo.radeon.com/rocm/apt/5.6/
+ARG ROCM_DEB_REPO=https://repo.radeon.com/rocm/apt/5.7/
 ARG ROCM_BUILD_NAME=ubuntu
 ARG ROCM_BUILD_NUM=main
-ARG ROCM_PATH=/opt/rocm-5.6.0
+ARG ROCM_PATH=/opt/rocm-5.7.0
 ARG GPU_DEVICE_TARGETS="gfx900 gfx906 gfx908 gfx90a gfx1030"
 
 ARG DEBIAN_FRONTEND=noninteractive
