@@ -198,6 +198,8 @@ COPY ./${INST_TF_ROCM_WHL_SCRIPT} /tmp/${INST_TF_ROCM_WHL_SCRIPT}
 RUN if [ -n "${INST_TF_ROCM_WHL_SCRIPT}" ]; then bash /tmp/${INST_TF_ROCM_WHL_SCRIPT} && \
     rm -f /${INST_TF_ROCM_WHL_SCRIPT}; fi
 
+# Set ROCM_PATH
+ENV ROCM_PATH="$ROCM_PATH"
 
 
 FROM binary_build as clean_build
