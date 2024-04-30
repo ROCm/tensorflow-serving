@@ -13,21 +13,21 @@
 # limitations under the License.
 FROM ubuntu:focal as base_build
 
-# TF-serving 2.14.0
-ARG TF_SERVING_VERSION_GIT_BRANCH=r2.14
-ARG TF_SERVING_VERSION_GIT_COMMIT=2f4cb27550535a795ce8dfbdad68bbee0133b2e6
+# TF-serving 2.15.0
+ARG TF_SERVING_VERSION_GIT_BRANCH=r2.15
+ARG TF_SERVING_VERSION_GIT_COMMIT=a0be2bf6ebf690a01dbe9747910952422be55945
 
 LABEL maintainer=Jason.Furmanek@amd.com
 LABEL tensorflow_serving_github_branchtag=${TF_SERVING_VERSION_GIT_BRANCH}
 LABEL tensorflow_serving_github_commit=${TF_SERVING_VERSION_GIT_COMMIT}
 
-ARG ROCM_REPO=https://repo.radeon.com/rocm/apt/5.7/
+ARG ROCM_REPO=https://repo.radeon.com/rocm/apt/6.1/
 ARG ROCM_BUILD_NAME=ubuntu
 ARG ROCM_BUILD_NUM=main
-ARG ROCM_PATH=/opt/rocm-5.7.0
+ARG ROCM_PATH=/opt/rocm-6.1.0
 ARG GPU_DEVICE_TARGETS="gfx900 gfx906 gfx908 gfx90a gfx1030"
 ARG TF_REPO="https://pypi.org"
-ARG TF_VERS_TO_POST_INSTALL="2.14.0"
+ARG TF_VERS_TO_POST_INSTALL="2.15.0"
 ARG PYTHON_VERS="3.9"
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -116,7 +116,7 @@ RUN pip3 --no-cache-dir install \
      --ignore-installed six>=1.12.0
 
 # Set up Bazel
-ENV BAZEL_VERSION 6.1.0
+ENV BAZEL_VERSION 6.4.0
 WORKDIR /
 RUN mkdir /bazel && \
     cd /bazel && \
@@ -162,7 +162,7 @@ ARG ROCM_PATH=/opt/rocm-5.7.0
 
 # Download tensorflow-rocm for org_tensorflow override
 ENV ROCM_TF_FORK_REPO="https://github.com/ROCmSoftwarePlatform/tensorflow-upstream"
-ENV ROCM_TF_FORK_BRANCH="r2.14-rocm-enhanced"
+ENV ROCM_TF_FORK_BRANCH="r2.15-rocm-enhanced"
 RUN rm -rf /tmp/tensorflow-upstream || true && \
     git clone -b ${ROCM_TF_FORK_BRANCH} ${ROCM_TF_FORK_REPO} /tmp/tensorflow-upstream
 
