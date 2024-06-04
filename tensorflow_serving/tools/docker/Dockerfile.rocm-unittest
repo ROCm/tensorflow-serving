@@ -15,7 +15,7 @@ FROM ubuntu:focal as base_build
 
 # TF-serving 2.14.0
 ARG TF_SERVING_VERSION_GIT_BRANCH=r2.15
-ARG TF_SERVING_VERSION_GIT_COMMIT=a0be2bf6ebf690a01dbe9747910952422be55945
+ARG TF_SERVING_VERSION_GIT_COMMIT=7aa35df0505613dcea0ee498c4916a81f2cc84d6
 
 LABEL maintainer=Jason.Furmanek@amd.com
 LABEL tensorflow_serving_github_branchtag=${TF_SERVING_VERSION_GIT_BRANCH}
@@ -154,7 +154,7 @@ ARG ROCM_PATH=/opt/rocm-5.7.0
 
 # Download tensorflow-rocm for org_tensorflow override
 ENV ROCM_TF_FORK_REPO="https://github.com/ROCmSoftwarePlatform/tensorflow-upstream"
-ENV ROCM_TF_FORK_BRANCH="r2.15-rocm-enhanced"
+ENV ROCM_TF_FORK_BRANCH="develop-upstream-QA-rocm62"
 RUN rm -rf /tmp/tensorflow-upstream || true && \
     git clone -b ${ROCM_TF_FORK_BRANCH} ${ROCM_TF_FORK_REPO} /tmp/tensorflow-upstream
 
