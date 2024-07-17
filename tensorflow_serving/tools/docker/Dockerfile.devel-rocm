@@ -59,15 +59,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         openjdk-8-jdk\
         openjdk-8-jre-headless \
         pkg-config \
-        python-dev \
         software-properties-common \
         swig \
         unzip \
         wget \
         zip \
         zlib1g-dev \
-        python3-distutils \
-        python-distutils-extra
+        python3-distutils
 
 # Install rocm pkgs
 # For precompiled miopen kernels search for all unversioned packages
