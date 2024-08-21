@@ -1,0 +1,41 @@
+# Packages needed to install Python from source
+# See https://github.com/pyenv/pyenv/wiki#suggested-build-environment
+build-essential
+curl
+libbz2-dev
+libffi-dev
+liblzma-dev
+libncurses5-dev
+libreadline-dev
+libsqlite3-dev
+libssl-dev
+libxml2-dev
+libxmlsec1-dev
+llvm
+make
+tk-dev
+wget
+xz-utils
+zlib1g-dev
+git
+
+# Additional packages
+automake
+build-essential
+ca-certificates
+curl
+git
+libfreetype6-dev
+libtool
+libcurl3-dev
+libzmq3-dev
+pkg-config
+python3-dev
+software-properties-common
+swig
+unzip
+wget
+zip
+zlib1g-dev
+python3-distutils
+python3-distutils-extra
