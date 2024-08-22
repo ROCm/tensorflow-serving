@@ -14,14 +14,12 @@
 FROM ubuntu:jammy as base_build
 
 # TF-serving 2.16.0
-ARG TF_SERVING_VERSION_GIT_BRANCH=r2.16
-ARG TF_SERVING_VERSION_GIT_COMMIT=0d726954f36a2b6c6bfb60a4caec311f2b3e3101
+ARG TF_SERVING_VERSION_GIT_BRANCH=r2.17
+ARG TF_SERVING_VERSION_GIT_COMMIT=6311b72ea7efdc8c306de3c3bc808388468b7a3d
 
 LABEL maintainer=Jason.Furmanek@amd.com
 LABEL tensorflow_serving_github_branchtag=${TF_SERVING_VERSION_GIT_BRANCH}
 LABEL tensorflow_serving_github_commit=${TF_SERVING_VERSION_GIT_COMMIT}
-
-ARG GPU_DEVICE_TARGETS="gfx900 gfx906 gfx908 gfx90a gfx940 gfx941 gfx942 gfx1030 gfx1100"
 
 # Install build dependencies
 COPY setup.packages.sh setup.packages.sh
@@ -91,7 +89,7 @@ ARG ROCM_PATH=/opt/rocm-6.2.0
 
 # Download tensorflow-rocm for org_tensorflow override
 ENV ROCM_TF_FORK_REPO="https://github.com/ROCmSoftwarePlatform/tensorflow-upstream"
-ENV ROCM_TF_FORK_BRANCH="r2.16-rocm-enhanced"
+ENV ROCM_TF_FORK_BRANCH="r2.17-rocm-enhanced"
 RUN rm -rf /tmp/tensorflow-upstream || true && \
     git clone -b ${ROCM_TF_FORK_BRANCH} ${ROCM_TF_FORK_REPO} /tmp/tensorflow-upstream
 
