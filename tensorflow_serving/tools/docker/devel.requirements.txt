@@ -33,7 +33,7 @@ gast == 0.4.0
 # Note that the CACHEBUSTER variable, set in the CI builds, will force these to
 # be the latest version.
 keras >= 3.2.0.dev
-tensorboard ~= 2.16.0
+tensorboard ~= 2.17.0
 # Test dependencies
 grpcio ~= 1.59.0 # Earliest version for Python 3.12
 portpicker ~= 1.6.0
@@ -52,7 +52,7 @@ lxml ~= 4.9.1
 pylint ~= 2.13.9
 urllib3<2
 mock
-future>=0.17.1 
+future>=0.17.1
 
 # For using Python 3.11 with Bazel 6 (b/286090018)
 lit ~= 16.0.5.post0
