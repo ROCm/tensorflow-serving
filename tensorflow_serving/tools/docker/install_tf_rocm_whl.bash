@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #TF_REPO="https://pypi.org"
-TF_REPO="https://repo.radeon.com/rocm/manylinux/rocm-rel-6.1/"
+TF_REPO="https://repo.radeon.com/rocm/manylinux/rocm-rel-6.2/"
 TF_VERS_TO_POST_INSTALL="2.16.0"
 TF_VERS_SUBSCRIPT=$( \
                     basename $ROCM_PATH | \
