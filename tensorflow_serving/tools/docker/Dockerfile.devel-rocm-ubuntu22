@@ -27,22 +27,23 @@ ARG ROCM_PATH=/opt/rocm-5.4.0
 ARG GPU_DEVICE_TARGETS="gfx900 gfx906 gfx908 gfx90a gfx1030"
 ARG TF_REPO="https://pypi.org"
 ARG TF_VERS_TO_POST_INSTALL="nightly"
-ARG PYTHON_VERS="3.9"
+ARG PYTHON_VERS="3.10"
 
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TF_NEED_ROCM 1
 ENV HOME /root/
 ENV HIP_PLATFORM=amd
-RUN apt-get --allow-unauthenticated update && apt install -y wget software-properties-common
+RUN apt-get --allow-unauthenticated update && apt install -y wget software-properties-common gnupg
 
-# Add rocm repository
+## Add rocm repository
 RUN apt-get clean all
 RUN wget -qO - https://repo.radeon.com/rocm/rocm.gpg.key | apt-key add -;
-RUN bin/bash -c 'if [[ $ROCM_REPO == https://repo.radeon.com/rocm/*  ]] ; then \
-      echo "deb [arch=amd64] $ROCM_REPO $ROCM_BUILD_NAME $ROCM_BUILD_NUM" > /etc/apt/sources.list.d/rocm.list; \
+
+RUN bin/bash -c "if [[ $ROCM_REPO == https://repo.radeon.com/rocm/*  ]] ; then \
+      echo 'deb [arch=amd64] $ROCM_REPO $ROCM_BUILD_NAME $ROCM_BUILD_NUM' > /etc/apt/sources.list.d/rocm.list; \
     else \
-      echo "deb [arch=amd64] $ROCM_REPO $ROCM_BUILD_NAME $ROCM_BUILD_NUM" > /etc/apt/sources.list.d/rocm.list ; \
-    fi'
+      echo 'deb [arch=amd64 trusted=yes] ${ROCM_REPO} ${ROCM_BUILD_NAME} ${ROCM_BUILD_NUM}' > /etc/apt/sources.list.d/rocm.list; \
+    fi"
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         automake \
@@ -52,13 +53,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         git \
         libfreetype6-dev \
         libtool \
-        libcurl3-dev \
+        libcurl4-openssl-dev \
         libzmq3-dev \
         mlocate \
         openjdk-8-jdk\
         openjdk-8-jre-headless \
         pkg-config \
-        python-dev \
+        python3-dev \
         software-properties-common \
         swig \
         unzip \
@@ -66,7 +67,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         zip \
         zlib1g-dev \
         python3-distutils \
-        python-distutils-extra
+        python3-distutils-extra
 
 # Install rocm pkgs
 # For precompiled miopen kernels search for all unversioned packages
