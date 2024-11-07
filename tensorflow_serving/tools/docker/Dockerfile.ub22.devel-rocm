@@ -95,6 +95,14 @@ ENV ROCM_TF_FORK_BRANCH="r2.16-rocm-enhanced"
 RUN rm -rf /tmp/tensorflow-upstream || true && \
     git clone -b ${ROCM_TF_FORK_BRANCH} ${ROCM_TF_FORK_REPO} /tmp/tensorflow-upstream
 
+# Check if the ROCm directory exists  
+RUN if [ -d "/opt/rocm-*" ]; then \  
+      echo "ROCm directory exists."; \  
+    else \  
+      echo "Error: ROCm directory does not exist."; \  
+      exit 1; \  
+    fi  
+
 RUN ROCM=$(ls -d /opt/rocm-*) && \
     bazel build --color=yes --curses=yes --copt="-fPIC"\
     --override_repository=org_tensorflow=/tmp/tensorflow-upstream \
