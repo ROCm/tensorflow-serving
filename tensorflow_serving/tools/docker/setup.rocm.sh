@@ -27,6 +27,7 @@ set -x
 # Get arguments (or defaults)
 ROCM_VERSION=6.1.0
 DISTRO=focal
+ROCM_REPO=https://repo.radeon.com/rocm/*
 if [[ -n $1 ]]; then
     ROCM_VERSION=$1
 fi
@@ -63,7 +64,7 @@ if [[ "$DISTRO" == "focal" ]] || [[ "$DISTRO" == "jammy" ]] || [[ "$DISTRO" == "
     DEBIAN_FRONTEND=noninteractive apt install -y wget software-properties-common
     DEBIAN_FRONTEND=noninteractive apt-get clean all
 
-    if [ ! -f "/${CUSTOM_INSTALL}" ]; then
+    if [ $ROCM_URL == "https://repo.radeon.com/rocm/*" ]; then
         # Make the directory if it doesn't exist yet.
         # This location is recommended by the distribution maintainers.
         mkdir --parents --mode=0755 /etc/apt/keyrings
@@ -100,7 +101,7 @@ if [[ "$DISTRO" == "focal" ]] || [[ "$DISTRO" == "jammy" ]] || [[ "$DISTRO" == "
     DEBIAN_FRONTEND=noninteractive apt-get install -y --allow-unauthenticated hipblaslt-dev || true
 
 elif [[ "$DISTRO" == "el7" ]]; then
-    if [ ! -f "/${CUSTOM_INSTALL}" ]; then
+    if [ $ROCM_URL == "https://repo.radeon.com/rocm/*" ]; then
         RPM_ROCM_REPO=http://repo.radeon.com/rocm/yum/${ROCM_VERS}/main
         echo -e "[ROCm]\nname=ROCm\nbaseurl=$RPM_ROCM_REPO\nenabled=1\ngpgcheck=0" >>/etc/yum.repos.d/rocm.repo
         echo -e "[amdgpu]\nname=amdgpu\nbaseurl=https://repo.radeon.com/amdgpu/${ROCM_VERS}/rhel/7/main/x86_64/\nenabled=1\ngpgcheck=0" >>/etc/yum.repos.d/amdgpu.repo
@@ -116,7 +117,7 @@ elif [[ "$DISTRO" == "el7" ]]; then
     yum --enablerepo=extras install -y hipblaslt-devel || true
 
 elif [[ "$DISTRO" == "el8" ]]; then
-    if [ ! -f "/${CUSTOM_INSTALL}" ]; then
+    if [ $ROCM_URL == "https://repo.radeon.com/rocm/*" ]; then
         RPM_ROCM_REPO=http://repo.radeon.com/rocm/rhel8/${ROCM_VERS}/main
         echo -e "[ROCm]\nname=ROCm\nbaseurl=$RPM_ROCM_REPO\nenabled=1\ngpgcheck=1\ngpgkey=https://repo.radeon.com/rocm/rocm.gpg.key" >>/etc/yum.repos.d/rocm.repo
         echo -e "[amdgpu]\nname=amdgpu\nbaseurl=https://repo.radeon.com/amdgpu/${ROCM_VERS}/rhel/8.8/main/x86_64/\nenabled=1\ngpgcheck=1\ngpgkey=https://repo.radeon.com/rocm/rocm.gpg.key" >>/etc/yum.repos.d/amdgpu.repo
