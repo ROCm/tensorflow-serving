@@ -39,7 +39,7 @@ ENV ROCM_PATH=${ROCM_PATH}
 COPY ${CUSTOM_INSTALL} /${CUSTOM_INSTALL}
 COPY setup.rocm.sh /setup.rocm.sh
 COPY devel.packages.rocm.txt /devel.packages.rocm.txt
-RUN /setup.rocm.sh $ROCM_VERSION jammy
+RUN /setup.rocm.sh $ROCM_VERSION jammy $ROCM_REPO
 
 # Install TF Serving pkg
 COPY --from=build_image /usr/local/bin/tensorflow_model_server /usr/bin/tensorflow_model_server
