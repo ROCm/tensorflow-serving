@@ -114,55 +114,55 @@ ARG ROCM_PATH=/opt/rocm-6.2.0
 ENV ROCM_PATH=${ROCM_PATH}
 
 
-#RUN ROCM=$(ls -d /opt/rocm-*) && \
-#    bazel build --color=yes --curses=yes --copt="-fPIC"\
-#    --override_repository=org_tensorflow=/tmp/tensorflow-upstream \
-#    --crosstool_top=@local_config_rocm//crosstool:toolchain \
-#    --define=using_rocm_hipcc=true \
-#    --define=tensorflow_mkldnn_contraction_kernel=0 \
-#    --repo_env TF_NEED_ROCM=1 \
-#    ${TF_SERVING_BAZEL_OPTIONS} \
-#    --verbose_failures \
-#    --output_filter=DONT_MATCH_ANYTHING \
-#    --action_env ROCM_PATH=$ROCM \
-#    --action_env=TF_PYTHON_VERSION=$PYTHON_VERSION \
-#    ${TF_SERVING_BUILD_OPTIONS} \
-#    --copt=-Wno-stringop-truncation \
-#    tensorflow_serving/model_servers:tensorflow_model_server && \
-#    cp bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server \
-#    /usr/local/bin/
+RUN ROCM=$(ls -d /opt/rocm-*) && \
+    bazel build --color=yes --curses=yes --copt="-fPIC"\
+    --override_repository=org_tensorflow=/tmp/tensorflow-upstream \
+    --crosstool_top=@local_config_rocm//crosstool:toolchain \
+    --define=using_rocm_hipcc=true \
+    --define=tensorflow_mkldnn_contraction_kernel=0 \
+    --repo_env TF_NEED_ROCM=1 \
+    ${TF_SERVING_BAZEL_OPTIONS} \
+    --verbose_failures \
+    --output_filter=DONT_MATCH_ANYTHING \
+    --action_env ROCM_PATH=$ROCM \
+    --action_env=TF_PYTHON_VERSION=$PYTHON_VERSION \
+    ${TF_SERVING_BUILD_OPTIONS} \
+    --copt=-Wno-stringop-truncation \
+    tensorflow_serving/model_servers:tensorflow_model_server && \
+    cp bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server \
+    /usr/local/bin/
 
-## Build and install TensorFlow Serving API
-#RUN ROCM=$(ls -d /opt/rocm-*) && \
-#    bazel build --color=yes --curses=yes \
-#    --override_repository=org_tensorflow=/tmp/tensorflow-upstream \
-#    --crosstool_top=@local_config_rocm//crosstool:toolchain \
-#    --define=using_rocm_hipcc=true \
-#    --define=tensorflow_mkldnn_contraction_kernel=0 \
-#    --repo_env TF_NEED_ROCM=1 \
-#    ${TF_SERVING_BAZEL_OPTIONS} \
-#    --verbose_failures \
-#    --output_filter=DONT_MATCH_ANYTHING \
-#    --action_env ROCM_PATH=$ROCM \
-#    ${TF_SERVING_BUILD_OPTIONS} \
-#    tensorflow_serving/tools/pip_package:build_pip_package && \
-#    bazel-bin/tensorflow_serving/tools/pip_package/build_pip_package \
-#    /tmp/pip && \
-#    pip --no-cache-dir install --upgrade \
-#    /tmp/pip/tensorflow_serving_api_gpu-*.whl && \
-#    rm -rf /tmp/pip
+# Build and install TensorFlow Serving API
+RUN ROCM=$(ls -d /opt/rocm-*) && \
+    bazel build --color=yes --curses=yes \
+    --override_repository=org_tensorflow=/tmp/tensorflow-upstream \
+    --crosstool_top=@local_config_rocm//crosstool:toolchain \
+    --define=using_rocm_hipcc=true \
+    --define=tensorflow_mkldnn_contraction_kernel=0 \
+    --repo_env TF_NEED_ROCM=1 \
+    ${TF_SERVING_BAZEL_OPTIONS} \
+    --verbose_failures \
+    --output_filter=DONT_MATCH_ANYTHING \
+    --action_env ROCM_PATH=$ROCM \
+    ${TF_SERVING_BUILD_OPTIONS} \
+    tensorflow_serving/tools/pip_package:build_pip_package && \
+    bazel-bin/tensorflow_serving/tools/pip_package/build_pip_package \
+    /tmp/pip && \
+    pip --no-cache-dir install --upgrade \
+    /tmp/pip/tensorflow_serving_api_gpu-*.whl && \
+    rm -rf /tmp/pip
 
-## Remove tensorflow-gpu and add tensorflow-rocm
-#ARG INST_TF_ROCM_WHL_SCRIPT
-#COPY ./${INST_TF_ROCM_WHL_SCRIPT} /tmp/${INST_TF_ROCM_WHL_SCRIPT}
-#RUN if [ -n "${INST_TF_ROCM_WHL_SCRIPT}" ]; then bash /tmp/${INST_TF_ROCM_WHL_SCRIPT} && \
-#    rm -f /${INST_TF_ROCM_WHL_SCRIPT}; fi
+# Remove tensorflow-gpu and add tensorflow-rocm
+ARG INST_TF_ROCM_WHL_SCRIPT
+COPY ./${INST_TF_ROCM_WHL_SCRIPT} /tmp/${INST_TF_ROCM_WHL_SCRIPT}
+RUN if [ -n "${INST_TF_ROCM_WHL_SCRIPT}" ]; then bash /tmp/${INST_TF_ROCM_WHL_SCRIPT} && \
+    rm -f /${INST_TF_ROCM_WHL_SCRIPT}; fi
 
 
 
-#FROM binary_build as clean_build
-## Clean up Bazel cache when done.
-#RUN bazel clean --expunge --color=yes && \
-#    rm -rf /root/.cache
-#CMD ["/bin/bash"]
+FROM binary_build as clean_build
+# Clean up Bazel cache when done.
+RUN bazel clean --expunge --color=yes && \
+    rm -rf /root/.cache
+CMD ["/bin/bash"]
 
