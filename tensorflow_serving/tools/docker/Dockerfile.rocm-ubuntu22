@@ -18,8 +18,9 @@ ARG TF_SERVING_BUILD_IMAGE=rocm/tensorflow-serving:${TF_SERVING_VERSION}-devel
 FROM ${TF_SERVING_BUILD_IMAGE} as build_image
 FROM ubuntu:20.04
 
-ARG TF_SERVING_VERSION_GIT_BRANCH=master
-ARG TF_SERVING_VERSION_GIT_COMMIT=head
+# TF-serving 2.16.0
+ARG TF_SERVING_VERSION_GIT_BRANCH=r2.16
+ARG TF_SERVING_VERSION_GIT_COMMIT=0d726954f36a2b6c6bfb60a4caec311f2b3e3101
 ARG DEBIAN_FRONTEND=noninteractive
 
 LABEL maintainer="Jason.Furmanek@amd.com"
@@ -40,12 +41,13 @@ RUN apt-get --allow-unauthenticated update && apt install -y wget software-prope
 
 # Add rocm repository
 RUN apt-get clean all
-RUN wget -qO - https://repo.radeon.com/rocm/rocm.gpg.key | apt-key add -;
-RUN bin/bash -c 'if [[ $ROCM_DEB_REPO == https://repo.radeon.com/rocm/*  ]] ; then \
-      echo "deb [arch=amd64] $ROCM_DEB_REPO $ROCM_BUILD_NAME $ROCM_BUILD_NUM" > /etc/apt/sources.list.d/rocm.list; \
-    else \
-      echo "deb [arch=amd64] $ROCM_DEB_REPO $ROCM_BUILD_NAME $ROCM_BUILD_NUM" > /etc/apt/sources.list.d/rocm.list ; \
-    fi'
+RUN case "$ROCM_REPO" in \  
+      https://repo.radeon.com/rocm/*) \  
+        echo "deb [arch=amd64] $ROCM_REPO $ROCM_BUILD_NAME $ROCM_BUILD_NUM" > /etc/apt/sources.list.d/rocm.list ;; \  
+      *) \  
+        echo "deb [arch=amd64 trusted=yes] ${ROCM_REPO} ${ROCM_BUILD_NAME} ${ROCM_BUILD_NUM}" > /etc/apt/sources.list.d/rocm.list; \  
+        printf "Package: *\nPin: release o=Artifactory\nPin-Priority: 600" | tee /etc/apt/preferences.d/rocm-pin-600 ;; \  
+    esac
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         ca-certificates \
