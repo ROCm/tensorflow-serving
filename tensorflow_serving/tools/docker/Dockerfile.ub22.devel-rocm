@@ -115,7 +115,7 @@ ENV ROCM_PATH=${ROCM_PATH}
 
 
 RUN ROCM=$(ls -d /opt/rocm-*) && \
-    bazel build --color=yes --curses=yes --copt="-fPIC"\
+    bazel build --color=yes --curses=yes --copt="-fPIC" \
     --override_repository=org_tensorflow=/tmp/tensorflow-upstream \
     --crosstool_top=@local_config_rocm//crosstool:toolchain \
     --define=using_rocm_hipcc=true \
