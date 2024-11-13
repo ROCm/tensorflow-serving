@@ -49,37 +49,63 @@ else
         ROCM_VERS=$ROCM_VERSION
 fi
 
+if [[ -n $3 ]]; then
+	ROCM_URL=$3
+else
+        if [[ "$2" == "focal" ]] || [[ "$2" == "jammy" ]] || [[ "$2" == "noble" ]]; then
+            ROCM_URL=https://repo.radeon.com/rocm/apt/
+	    ROCM_URL=${ROCM_URL}${ROCM_VERS}/
+        elif [[ "$2" == "el7" ]]; then
+            ROCM_URL=http://repo.radeon.com/rocm/yum/${ROCM_VERS}/main
+        elif [[ "$2" == "el8" ]]; then
+            ROCM_URL=http://repo.radeon.com/rocm/rhel8/${ROCM_VERS}/main
+	fi
+fi
+
+if [[ -n $4 ]]; then
+        ROCM_BUILD_NAME=$4
+else
+        if [[ "$2" == "focal" ]] || [[ "$2" == "jammy" ]] || [[ "$2" == "noble" ]]; then
+            ROCM_BUILD_NAME=${DISTRO}
+	fi
+fi
+
+if [[ -n $5 ]]; then
+        ROCM_BUILD_NUM=$5
+else
+        if [[ "$2" == "focal" ]] || [[ "$2" == "jammy" ]] || [[ "$2" == "noble" ]]; then
+            ROCM_BUILD_NUM=main
+	fi
+fi
+
 if [[ "$DISTRO" == "focal" ]] || [[ "$DISTRO" == "jammy" ]] || [[ "$DISTRO" == "noble" ]]; then
-    ROCM_DEB_REPO_HOME=https://repo.radeon.com/rocm/apt/
+    #ROCM_DEB_REPO_HOME=https://repo.radeon.com/rocm/apt/
     AMDGPU_DEB_REPO_HOME=https://repo.radeon.com/amdgpu/
-    ROCM_BUILD_NAME=${DISTRO}
-    ROCM_BUILD_NUM=main
+    #ROCM_BUILD_NAME=${DISTRO}
+    #ROCM_BUILD_NUM=main
 
     # Adjust the ROCM repo location
-    ROCM_DEB_REPO=${ROCM_DEB_REPO_HOME}${ROCM_VERS}/
+    #ROCM_DEB_REPO=${ROCM_DEB_REPO_HOME}${ROCM_VERS}/
     AMDGPU_DEB_REPO=${AMDGPU_DEB_REPO_HOME}${ROCM_VERS}/
 
     DEBIAN_FRONTEND=noninteractive apt-get --allow-unauthenticated update 
     DEBIAN_FRONTEND=noninteractive apt install -y wget software-properties-common
     DEBIAN_FRONTEND=noninteractive apt-get clean all
 
-    if [ ! -f "/${CUSTOM_INSTALL}" ]; then
-        # Make the directory if it doesn't exist yet.
-        # This location is recommended by the distribution maintainers.
-        mkdir --parents --mode=0755 /etc/apt/keyrings
+    # Make the directory if it doesn't exist yet.
+    # This location is recommended by the distribution maintainers.
+    mkdir --parents --mode=0755 /etc/apt/keyrings
 
-        # Download the key, convert the signing-key to a full
-        # keyring required by apt and store in the keyring directory
-        wget https://repo.radeon.com/rocm/rocm.gpg.key -O - | \
-            gpg --dearmor | tee /etc/apt/keyrings/rocm.gpg > /dev/null
+    # Download the key, convert the signing-key to a full
+    # keyring required by apt and store in the keyring directory
+    wget https://repo.radeon.com/rocm/rocm.gpg.key -O - | \
+        gpg --dearmor | tee /etc/apt/keyrings/rocm.gpg > /dev/null
 
-        echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] $AMDGPU_DEB_REPO/ubuntu $ROCM_BUILD_NAME $ROCM_BUILD_NUM" | tee --append /etc/apt/sources.list.d/amdgpu.list
-        echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] $ROCM_DEB_REPO $ROCM_BUILD_NAME $ROCM_BUILD_NUM" | tee /etc/apt/sources.list.d/rocm.list
-        echo -e 'Package: *\nPin: release o=repo.radeon.com\nPin-Priority: 600' \
-             | tee /etc/apt/preferences.d/rocm-pin-600
-    else
-        bash "/${CUSTOM_INSTALL}"
-    fi
+    #echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] $AMDGPU_DEB_REPO/ubuntu $ROCM_BUILD_NAME $ROCM_BUILD_NUM" | tee --append /etc/apt/sources.list.d/amdgpu.list
+    echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg trusted=yes] $ROCM_URL $ROCM_BUILD_NAME $ROCM_BUILD_NUM" | tee /etc/apt/sources.list.d/rocm.list
+    echo -e 'Package: *\nPin: release o=repo.radeon.com\nPin-Priority: 600' \
+         | tee /etc/apt/preferences.d/rocm-pin-600
+
     apt-get update --allow-insecure-repositories
 
     wget -qO - https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
@@ -100,13 +126,9 @@ if [[ "$DISTRO" == "focal" ]] || [[ "$DISTRO" == "jammy" ]] || [[ "$DISTRO" == "
     DEBIAN_FRONTEND=noninteractive apt-get install -y --allow-unauthenticated hipblaslt-dev || true
 
 elif [[ "$DISTRO" == "el7" ]]; then
-    if [ ! -f "/${CUSTOM_INSTALL}" ]; then
-        RPM_ROCM_REPO=http://repo.radeon.com/rocm/yum/${ROCM_VERS}/main
-        echo -e "[ROCm]\nname=ROCm\nbaseurl=$RPM_ROCM_REPO\nenabled=1\ngpgcheck=0" >>/etc/yum.repos.d/rocm.repo
-        echo -e "[amdgpu]\nname=amdgpu\nbaseurl=https://repo.radeon.com/amdgpu/${ROCM_VERS}/rhel/7/main/x86_64/\nenabled=1\ngpgcheck=0" >>/etc/yum.repos.d/amdgpu.repo
-    else
-        bash "/${CUSTOM_INSTALL}"
-    fi
+    #RPM_ROCM_REPO=http://repo.radeon.com/rocm/yum/${ROCM_VERS}/main
+    echo -e "[ROCm]\nname=ROCm\nbaseurl=$ROCM_URL\nenabled=1\ngpgcheck=0" >>/etc/yum.repos.d/rocm.repo
+    echo -e "[amdgpu]\nname=amdgpu\nbaseurl=https://repo.radeon.com/amdgpu/${ROCM_VERS}/rhel/7/main/x86_64/\nenabled=1\ngpgcheck=0" >>/etc/yum.repos.d/amdgpu.repo
     yum clean all
 
     # install rocm
@@ -116,13 +138,9 @@ elif [[ "$DISTRO" == "el7" ]]; then
     yum --enablerepo=extras install -y hipblaslt-devel || true
 
 elif [[ "$DISTRO" == "el8" ]]; then
-    if [ ! -f "/${CUSTOM_INSTALL}" ]; then
-        RPM_ROCM_REPO=http://repo.radeon.com/rocm/rhel8/${ROCM_VERS}/main
-        echo -e "[ROCm]\nname=ROCm\nbaseurl=$RPM_ROCM_REPO\nenabled=1\ngpgcheck=1\ngpgkey=https://repo.radeon.com/rocm/rocm.gpg.key" >>/etc/yum.repos.d/rocm.repo
+        #RPM_ROCM_REPO=http://repo.radeon.com/rocm/rhel8/${ROCM_VERS}/main
+        echo -e "[ROCm]\nname=ROCm\nbaseurl=$ROCM_URL\nenabled=1\ngpgcheck=1\ngpgkey=https://repo.radeon.com/rocm/rocm.gpg.key" >>/etc/yum.repos.d/rocm.repo
         echo -e "[amdgpu]\nname=amdgpu\nbaseurl=https://repo.radeon.com/amdgpu/${ROCM_VERS}/rhel/8.8/main/x86_64/\nenabled=1\ngpgcheck=1\ngpgkey=https://repo.radeon.com/rocm/rocm.gpg.key" >>/etc/yum.repos.d/amdgpu.repo
-    else
-        bash "/${CUSTOM_INSTALL}"
-    fi
     dnf clean all
 
     # install rocm
