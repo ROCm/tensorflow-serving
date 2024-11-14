@@ -103,8 +103,18 @@ if [[ "$DISTRO" == "focal" ]] || [[ "$DISTRO" == "jammy" ]] || [[ "$DISTRO" == "
 
     #echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] $AMDGPU_DEB_REPO/ubuntu $ROCM_BUILD_NAME $ROCM_BUILD_NUM" | tee --append /etc/apt/sources.list.d/amdgpu.list
     echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg trusted=yes] $ROCM_URL $ROCM_BUILD_NAME $ROCM_BUILD_NUM" | tee /etc/apt/sources.list.d/rocm.list
-    echo -e 'Package: *\nPin: release o=repo.radeon.com\nPin-Priority: 600' \
-         | tee /etc/apt/preferences.d/rocm-pin-600
+ 
+ 
+    if [[ "$ROCM_URL" == *"repo.radeon.com"* ]]; then  
+        echo "ROCM_URL contains repo.radeon.com"  
+        # Set pinning for repo.radeon.com  
+        echo -e 'Package: *\nPin: release o=repo.radeon.com\nPin-Priority: 600' | tee /etc/apt/preferences.d/rocm-pin-600  
+    else  
+        echo "ROCM_URL does not contain repo.radeon.com"  
+        # Set pinning for ARTIFACTORY  
+        /setup_pining.sh
+    fi  
+`
 
     apt-get update --allow-insecure-repositories
 
