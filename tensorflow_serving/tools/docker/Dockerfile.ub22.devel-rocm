@@ -90,7 +90,7 @@ ARG TF_SERVING_BUILD_OPTIONS="--config=release"
 RUN echo "Building with build options: ${TF_SERVING_BUILD_OPTIONS}"
 ARG TF_SERVING_BAZEL_OPTIONS=""
 RUN echo "Building with Bazel options: ${TF_SERVING_BAZEL_OPTIONS}"
-ARG ROCM_PATH=/opt/rocm-6.4.0
+ARG ROCM_PATH=/opt/rocm-${ROCM_VERSION}
 
 # Download tensorflow-rocm for org_tensorflow override
 ENV ROCM_TF_FORK_REPO="https://github.com/ROCmSoftwarePlatform/tensorflow-upstream"
@@ -109,11 +109,9 @@ RUN ROCM_DIR=$(ls -d /opt/rocm-* 2>/dev/null || echo "") && \
       exit 1; \  
     fi  
 
-ARG ROCM_PATH=/opt/rocm-6.4.0  
+ARG ROCM_PATH=/opt/rocm-${ROCM_VERSION} 
 ENV ROCM_PATH=${ROCM_PATH}
 
-
-RUN if [ROCM_BUILD_NUM && ROCM_BUILD_NAME != null ]
 
 COPY custom_install.sh /custom_install.sh
 
