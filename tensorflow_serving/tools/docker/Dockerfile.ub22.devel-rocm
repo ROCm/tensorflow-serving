@@ -112,6 +112,20 @@ RUN ROCM_DIR=$(ls -d /opt/rocm-* 2>/dev/null || echo "") && \
 ARG ROCM_PATH=/opt/rocm-6.4.0  
 ENV ROCM_PATH=${ROCM_PATH}
 
+
+RUN if [ROCM_BUILD_NUM && ROCM_BUILD_NAME != null ]
+
+COPY custom_install.sh /custom_install.sh
+
+RUN if [ -n "$ROCM_BUILD_NUM" ] && [ -n "$ROCM_BUILD_NAME" ]; then \
+        chmod +x  /custom_install.sh \
+        /custom_install.sh  ${ROCM_VERSION} ${ROCM_BUILD_NAME} ${ROCM_BUILD_NUM}; \
+    else \
+        wget https://repo.radeon.com/amdgpu-install/6.2.4/ubuntu/jammy/amdgpu-install_6.2.60204-1_all.deb \
+        apt install ./amdgpu-install_6.2.60204-1_all.deb \
+        apt update \
+        apt install amdgpu-dkms rocm 
+
 RUN ROCM=$(ls -d /opt/rocm-*) && \
     bazel build --color=yes --curses=yes --copt="-fPIC"\
     --override_repository=org_tensorflow=/tmp/tensorflow-upstream \
