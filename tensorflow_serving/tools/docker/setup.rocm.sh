@@ -114,7 +114,6 @@ if [[ "$DISTRO" == "focal" ]] || [[ "$DISTRO" == "jammy" ]] || [[ "$DISTRO" == "
         # Set pinning for ARTIFACTORY  
         /setup_pining.sh
     fi  
-`
 
     apt-get update --allow-insecure-repositories
 
