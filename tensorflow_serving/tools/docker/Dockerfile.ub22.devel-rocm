@@ -46,7 +46,7 @@ RUN /setup.rocm.sh $ROCM_VERSION jammy $ROCM_URL $ROCM_BUILD_NAME $ROCM_BUILD_NU
 
 RUN if [ -n "$ROCM_BUILD_NUM" ] && [ -n "$ROCM_BUILD_NAME" ]; then \  
         echo "Both ROCM_BUILD_NUM and ROCM_BUILD_NAME are set."; \
-        apt update -y \  
+        apt update -y; \  
         chmod +x /custom_install.sh; \  
         /custom_install.sh ${ROCM_VERSION} ${ROCM_BUILD_NAME} ${ROCM_BUILD_NUM}; \  
     else \  
