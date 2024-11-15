@@ -122,7 +122,7 @@ if [[ "$DISTRO" == "focal" ]] || [[ "$DISTRO" == "jammy" ]] || [[ "$DISTRO" == "
     else  
         echo "ROCM_URL does not contain repo.radeon.com"  
         # Set pinning for ARTIFACTORY
-        chmod +x setup_pining.sh
+        chmod +x /setup_pining.sh
         /setup_pining.sh $ROCM_BUILD_NAME $ROCM_BUILD_NUM
     fi  
 
