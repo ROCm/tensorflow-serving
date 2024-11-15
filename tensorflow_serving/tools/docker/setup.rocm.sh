@@ -80,13 +80,15 @@ fi
 
 if [[ "$DISTRO" == "focal" ]] || [[ "$DISTRO" == "jammy" ]] || [[ "$DISTRO" == "noble" ]]; then
     #ROCM_DEB_REPO_HOME=https://repo.radeon.com/rocm/apt/
-    AMDGPU_DEB_REPO_HOME=https://repo.radeon.com/amdgpu/
+    
     #ROCM_BUILD_NAME=${DISTRO}
     #ROCM_BUILD_NUM=main
+    #AMDGPU_DEB_REPO_HOME=https://repo.radeon.com/amdgpu/
 
     # Adjust the ROCM repo location
     #ROCM_DEB_REPO=${ROCM_DEB_REPO_HOME}${ROCM_VERS}/
-    AMDGPU_DEB_REPO=${AMDGPU_DEB_REPO_HOME}${ROCM_VERS}/
+
+    #AMDGPU_DEB_REPO=${AMDGPU_DEB_REPO_HOME}${ROCM_VERS}/
 
     DEBIAN_FRONTEND=noninteractive apt-get --allow-unauthenticated update 
     DEBIAN_FRONTEND=noninteractive apt install -y wget software-properties-common
@@ -94,25 +96,33 @@ if [[ "$DISTRO" == "focal" ]] || [[ "$DISTRO" == "jammy" ]] || [[ "$DISTRO" == "
 
     # Make the directory if it doesn't exist yet.
     # This location is recommended by the distribution maintainers.
-    mkdir --parents --mode=0755 /etc/apt/keyrings
+
+    #mkdir --parents --mode=0755 /etc/apt/keyrings
 
     # Download the key, convert the signing-key to a full
     # keyring required by apt and store in the keyring directory
-    wget https://repo.radeon.com/rocm/rocm.gpg.key -O - | \
-        gpg --dearmor | tee /etc/apt/keyrings/rocm.gpg > /dev/null
+    #wget https://repo.radeon.com/rocm/rocm.gpg.key -O - | \
+    #    gpg --dearmor | tee /etc/apt/keyrings/rocm.gpg > /dev/null
 
     #echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] $AMDGPU_DEB_REPO/ubuntu $ROCM_BUILD_NAME $ROCM_BUILD_NUM" | tee --append /etc/apt/sources.list.d/amdgpu.list
-    echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg trusted=yes] $ROCM_URL $ROCM_BUILD_NAME $ROCM_BUILD_NUM" | tee /etc/apt/sources.list.d/rocm.list
+    
+    #echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg trusted=yes] $ROCM_URL $ROCM_BUILD_NAME $ROCM_BUILD_NUM" | tee /etc/apt/sources.list.d/rocm.list
  
  
     if [[ "$ROCM_URL" == *"repo.radeon.com"* ]]; then  
         echo "ROCM_URL contains repo.radeon.com"  
-        # Set pinning for repo.radeon.com  
+        # Set pinning for repo.radeon.com
+        AMDGPU_DEB_REPO_HOME=https://repo.radeon.com/amdgpu/
+        AMDGPU_DEB_REPO=${AMDGPU_DEB_REPO_HOME}${ROCM_VERS}/
+        mkdir --parents --mode=0755 /etc/apt/keyrings
+        wget https://repo.radeon.com/rocm/rocm.gpg.key -O - | \
+            gpg --dearmor | tee /etc/apt/keyrings/rocm.gpg > /dev/null
+        echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg trusted=yes] $ROCM_URL $ROCM_BUILD_NAME $ROCM_BUILD_NUM" | tee /etc/apt/sources.list.d/rocm.list
         echo -e 'Package: *\nPin: release o=repo.radeon.com\nPin-Priority: 600' | tee /etc/apt/preferences.d/rocm-pin-600  
     else  
         echo "ROCM_URL does not contain repo.radeon.com"  
         # Set pinning for ARTIFACTORY  
-        /setup_pining.sh
+        /setup_pining.sh $ROCM_BUILD_NAME $ROCM_BUILD_NUM
     fi  
 
     apt-get update --allow-insecure-repositories
