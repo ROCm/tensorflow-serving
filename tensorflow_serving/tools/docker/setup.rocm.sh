@@ -121,7 +121,8 @@ if [[ "$DISTRO" == "focal" ]] || [[ "$DISTRO" == "jammy" ]] || [[ "$DISTRO" == "
         echo -e 'Package: *\nPin: release o=repo.radeon.com\nPin-Priority: 600' | tee /etc/apt/preferences.d/rocm-pin-600  
     else  
         echo "ROCM_URL does not contain repo.radeon.com"  
-        # Set pinning for ARTIFACTORY  
+        # Set pinning for ARTIFACTORY
+        chmod +x setup_pining.sh
         /setup_pining.sh $ROCM_BUILD_NAME $ROCM_BUILD_NUM
     fi  
 
