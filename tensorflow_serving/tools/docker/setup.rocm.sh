@@ -79,14 +79,6 @@ else
 fi
 
 if [[ "$DISTRO" == "focal" ]] || [[ "$DISTRO" == "jammy" ]] || [[ "$DISTRO" == "noble" ]]; then
-    #ROCM_DEB_REPO_HOME=https://repo.radeon.com/rocm/apt/
-    #AMDGPU_DEB_REPO_HOME=https://repo.radeon.com/amdgpu/
-    #ROCM_BUILD_NAME=${DISTRO}
-    #ROCM_BUILD_NUM=main
-
-    ## Adjust the ROCM repo location
-    #ROCM_DEB_REPO=${ROCM_DEB_REPO_HOME}${ROCM_VERS}/
-    #AMDGPU_DEB_REPO=${AMDGPU_DEB_REPO_HOME}${ROCM_VERS}/
 
     DEBIAN_FRONTEND=noninteractive apt-get --allow-unauthenticated update 
     DEBIAN_FRONTEND=noninteractive apt install -y wget software-properties-common
@@ -104,9 +96,7 @@ if [[ "$DISTRO" == "focal" ]] || [[ "$DISTRO" == "jammy" ]] || [[ "$DISTRO" == "
         echo -e 'Package: *\nPin: release o=repo.radeon.com\nPin-Priority: 600' | tee /etc/apt/preferences.d/rocm-pin-600  
     else  
         echo "ROCM_URL does not contain repo.radeon.com"  
-        # Set pinning for ARTIFACTORY
         chmod +x /setup_pining.sh
-        #/setup_pining.sh $ROCM_BUILD_NAME $ROCM_BUILD_NUM
     fi 
 
     apt-get update --allow-insecure-repositories
@@ -129,7 +119,6 @@ if [[ "$DISTRO" == "focal" ]] || [[ "$DISTRO" == "jammy" ]] || [[ "$DISTRO" == "
     DEBIAN_FRONTEND=noninteractive apt-get install -y --allow-unauthenticated hipblaslt-dev || true
 
 elif [[ "$DISTRO" == "el7" ]]; then
-    #RPM_ROCM_REPO=http://repo.radeon.com/rocm/yum/${ROCM_VERS}/main
     echo -e "[ROCm]\nname=ROCm\nbaseurl=$ROCM_URL\nenabled=1\ngpgcheck=0" >>/etc/yum.repos.d/rocm.repo
     echo -e "[amdgpu]\nname=amdgpu\nbaseurl=https://repo.radeon.com/amdgpu/${ROCM_VERS}/rhel/7/main/x86_64/\nenabled=1\ngpgcheck=0" >>/etc/yum.repos.d/amdgpu.repo
     yum clean all
