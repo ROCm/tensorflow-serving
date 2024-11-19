@@ -80,21 +80,14 @@ fi
 
 if [[ "$DISTRO" == "focal" ]] || [[ "$DISTRO" == "jammy" ]] || [[ "$DISTRO" == "noble" ]]; then
     
-    
     # Adjust the ROCM repo location
-    
-    
 
     DEBIAN_FRONTEND=noninteractive apt-get --allow-unauthenticated update 
     DEBIAN_FRONTEND=noninteractive apt install -y wget software-properties-common
     DEBIAN_FRONTEND=noninteractive apt-get clean all
 
-            # Make the directory if it doesn't exist yet.
-        # This location is recommended by the distribution maintainers.
-        #mkdir --parents --mode=0755 /etc/apt/keyrings
-
-        # Download the key, convert the signing-key to a full
-        # keyring required by apt and store in the keyring directory
+    # Download the key, convert the signing-key to a full
+    # keyring required by apt and store in the keyring directory
     if [[ "$ROCM_URL" == *"repo.radeon.com"* ]]; then  
         echo "ROCM_URL contains repo.radeon.com"  
         # Set pinning for repo.radeon.com
@@ -106,10 +99,8 @@ if [[ "$DISTRO" == "focal" ]] || [[ "$DISTRO" == "jammy" ]] || [[ "$DISTRO" == "
         echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg trusted=yes] $ROCM_URL $ROCM_BUILD_NAME $ROCM_BUILD_NUM" | tee /etc/apt/sources.list.d/rocm.list
         echo -e 'Package: *\nPin: release o=repo.radeon.com\nPin-Priority: 600' | tee /etc/apt/preferences.d/rocm-pin-600  
     else  
-        echo "ROCM_URL does not contain repo.radeon.com"  
-        # Set pinning for ARTIFACTORY
+        echo "ROCM_URL does not contain repo.radeon.com"
         chmod +x /setup_pining.sh
-        #/setup_pining.sh $ROCM_BUILD_NAME $ROCM_BUILD_NUM
     fi
 
     apt-get update --allow-insecure-repositories
@@ -143,7 +134,6 @@ elif [[ "$DISTRO" == "el7" ]]; then
     yum --enablerepo=extras install -y hipblaslt-devel || true
 
 elif [[ "$DISTRO" == "el8" ]]; then
-    #RPM_ROCM_REPO=http://repo.radeon.com/rocm/rhel8/${ROCM_VERS}/main
     echo -e "[ROCm]\nname=ROCm\nbaseurl=$ROCM_URL\nenabled=1\ngpgcheck=1\ngpgkey=https://repo.radeon.com/rocm/rocm.gpg.key" >>/etc/yum.repos.d/rocm.repo
     dnf clean all
 
