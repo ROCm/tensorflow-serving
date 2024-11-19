@@ -17,7 +17,6 @@ hipcub-dev
 rccl-dev
 hipsparse-dev
 hipsolver-dev
-#adding new
 rocm-hip-runtime
 rocm-utils
 
