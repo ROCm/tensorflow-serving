@@ -30,13 +30,30 @@ RUN /setup.packages.sh /builder.packages.txt
 
 # Install ROCM
 ARG ROCM_VERSION=6.2.0
+ARG ROCM_URL
+ARG ROCM_BUILD_NAME
+ARG ROCM_BUILD_NUM
 ARG CUSTOM_INSTALL
+ENV ROCM_VERSION=${ROCM_VERSION}
 ARG ROCM_PATH=/opt/rocm-${ROCM_VERSION}
 ENV ROCM_PATH=${ROCM_PATH}
 COPY ${CUSTOM_INSTALL} /${CUSTOM_INSTALL}
 COPY setup.rocm.sh /setup.rocm.sh
 COPY devel.packages.rocm.txt /devel.packages.rocm.txt
-RUN /setup.rocm.sh $ROCM_VERSION jammy
+COPY setup_pining.sh /setup_pining.sh
+COPY custom_install.sh /custom_install.sh
+RUN /setup.rocm.sh $ROCM_VERSION jammy $ROCM_URL $ROCM_BUILD_NAME $ROCM_BUILD_NUM
+RUN if [ -n "$ROCM_BUILD_NUM" ] && [ -n "$ROCM_BUILD_NAME" ]; then \  
+        echo "Both ROCM_BUILD_NUM and ROCM_BUILD_NAME are set."; \
+        apt update -y; \  
+        chmod +x /custom_install.sh; \  
+        /custom_install.sh ${ROCM_VERSION} ${ROCM_BUILD_NAME} ${ROCM_BUILD_NUM}; \  
+    else \  
+        wget https://repo.radeon.com/amdgpu-install/6.2.4/ubuntu/jammy/amdgpu-install_6.2.60204-1_all.deb; \  
+        apt install -y ./amdgpu-install_6.2.60204-1_all.deb; \  
+        apt update; \  
+        apt install -y amdgpu-dkms rocm; \  
+    fi  
 
 # Setup Python environment. PYTHON_VERSION is e.g. "python3.8"
 ARG PYTHON_VERSION=3.10
@@ -87,13 +104,28 @@ ARG TF_SERVING_BUILD_OPTIONS="--config=release"
 RUN echo "Building with build options: ${TF_SERVING_BUILD_OPTIONS}"
 ARG TF_SERVING_BAZEL_OPTIONS=""
 RUN echo "Building with Bazel options: ${TF_SERVING_BAZEL_OPTIONS}"
-ARG ROCM_PATH=/opt/rocm-6.2.0
+ARG ROCM_PATH=/opt/rocm-${ROCM_VERSION}
 
 # Download tensorflow-rocm for org_tensorflow override
 ENV ROCM_TF_FORK_REPO="https://github.com/ROCmSoftwarePlatform/tensorflow-upstream"
 ENV ROCM_TF_FORK_BRANCH="r2.15-rocm-enhanced"
 RUN rm -rf /tmp/tensorflow-upstream || true && \
     git clone -b ${ROCM_TF_FORK_BRANCH} ${ROCM_TF_FORK_REPO} /tmp/tensorflow-upstream
+
+    RUN ls -la ${ROCM_PATH}
+
+# Check if the ROCm directory exists  
+RUN ROCM_DIR=$(ls -d /opt/rocm-* 2>/dev/null || echo "") && \  
+    if [ -n "$ROCM_DIR" ]; then \  
+      echo "ROCm directory exists: $ROCM_DIR"; \  
+    else \  
+      echo "Error: ROCm directory does not exist."; \  
+      exit 1; \  
+    fi  
+
+ARG ROCM_PATH=/opt/rocm-${ROCM_VERSION} 
+ENV ROCM_PATH=${ROCM_PATH}
+ENV ROCM_VERSION=${ROCM_VERSION}
 
 RUN ROCM=$(ls -d /opt/rocm-*) && \
     bazel build --color=yes --curses=yes --copt="-fPIC"\
