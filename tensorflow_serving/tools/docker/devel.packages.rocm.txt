@@ -17,6 +17,9 @@ hipcub-dev
 rccl-dev
 hipsparse-dev
 hipsolver-dev
+rocm-hip-runtime
+rocm-utils
+
 
 # Other build-related tools
 apt-transport-https
