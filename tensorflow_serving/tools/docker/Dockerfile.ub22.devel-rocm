@@ -39,9 +39,14 @@ ARG ROCM_PATH=/opt/rocm-${ROCM_VERSION}
 ENV ROCM_PATH=${ROCM_PATH}
 COPY ${CUSTOM_INSTALL} /${CUSTOM_INSTALL}
 COPY setup.rocm.sh /setup.rocm.sh
-COPY devel.packages.rocm.txt /devel.packages.rocm.txt
-COPY setup_pining.sh /setup_pining.sh
-COPY custom_install.sh /custom_install.sh
+COPY devel.packages.rocm.txt /devel.packages.rocm.txt 
+RUN if [ -n "$ROCM_BUILD_NUM" ] && [ -n "$ROCM_BUILD_NAME" ]; then \  
+        echo "Both ROCM_BUILD_NUM and ROCM_BUILD_NAME are set. Copying files..."; \  
+        cp /source/setup_pining.sh /setup_pining.sh; \  
+        cp /source/custom_install.sh /custom_install.sh; \  
+    else \  
+        echo "ROCM_BUILD_NUM or ROCM_BUILD_NAME is not set. Skipping file copy."; \  
+    fi
 RUN /setup.rocm.sh $ROCM_VERSION jammy $ROCM_URL $ROCM_BUILD_NAME $ROCM_BUILD_NUM
 
 RUN if [ -n "$ROCM_BUILD_NUM" ] && [ -n "$ROCM_BUILD_NAME" ]; then \  
