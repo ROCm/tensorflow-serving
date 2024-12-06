@@ -14,8 +14,8 @@
 FROM ubuntu:jammy as base_build
 
 # TF-serving 2.16.0
-ARG TF_SERVING_VERSION_GIT_BRANCH=r2.16
-ARG TF_SERVING_VERSION_GIT_COMMIT=0d726954f36a2b6c6bfb60a4caec311f2b3e3101
+ARG TF_SERVING_VERSION_GIT_BRANCH=r2.17
+ARG TF_SERVING_VERSION_GIT_COMMIT=6311b72ea7efdc8c306de3c3bc808388468b7a3d
 
 LABEL maintainer=Jason.Furmanek@amd.com
 LABEL tensorflow_serving_github_branchtag=${TF_SERVING_VERSION_GIT_BRANCH}
@@ -44,15 +44,15 @@ COPY setup_pining.sh /setup_pining.sh
 COPY custom_install.sh /custom_install.sh
 RUN /setup.rocm.sh $ROCM_VERSION jammy $ROCM_URL $ROCM_BUILD_NAME $ROCM_BUILD_NUM
 
-RUN if [ -n "$ROCM_BUILD_NUM" ] && [ -n "$ROCM_BUILD_NAME" ] && [ "$ROCM_URL" != *"repo.radeon.com/rocm"* ]; then \  
-        echo "Both ROCM_BUILD_NUM and ROCM_BUILD_NAME are set, and ROCM_URL does not contain repo.radeon.com/rocm."; \  
-        apt update -y; \  
-        chmod +x /custom_install.sh; \  
-        /custom_install.sh ${ROCM_VERSION} ${ROCM_BUILD_NAME} ${ROCM_BUILD_NUM}; \  
-    else \
-        apt update; \  
-        apt install -y rocm; \  
-    fi  
+RUN if [ "$ROCM_URL" != *"repo.radeon.com"* ]; then \  
+        apt update -y; \
+        apt install -y rocm; \ 
+    else \  
+        echo "Both ROCM_BUILD_NUM and ROCM_BUILD_NAME are set."; \
+        apt update -y; \
+        chmod +x /custom_install.sh; \
+        /custom_install.sh ${ROCM_VERSION} ${ROCM_BUILD_NAME} ${ROCM_BUILD_NUM}; \
+    fi
 
 # Setup Python environment. PYTHON_VERSION is e.g. "python3.8"
 ARG PYTHON_VERSION=3.10
@@ -107,19 +107,19 @@ ARG ROCM_PATH=/opt/rocm-${ROCM_VERSION}
 
 # Download tensorflow-rocm for org_tensorflow override
 ENV ROCM_TF_FORK_REPO="https://github.com/ROCmSoftwarePlatform/tensorflow-upstream"
-ENV ROCM_TF_FORK_BRANCH="r2.16-rocm-enhanced"
+ENV ROCM_TF_FORK_BRANCH="r2.17-rocm-enhanced"
 RUN rm -rf /tmp/tensorflow-upstream || true && \
     git clone -b ${ROCM_TF_FORK_BRANCH} ${ROCM_TF_FORK_REPO} /tmp/tensorflow-upstream
 
-    RUN ls -la ${ROCM_PATH}
+RUN ls -la ${ROCM_PATH}
 
 # Check if the ROCm directory exists  
 RUN ROCM_DIR=$(ls -d /opt/rocm-* 2>/dev/null || echo "") && \  
     if [ -n "$ROCM_DIR" ]; then \  
-      echo "ROCm directory exists: $ROCM_DIR"; \  
+        echo "ROCm directory exists: $ROCM_DIR"; \  
     else \  
-      echo "Error: ROCm directory does not exist."; \  
-      exit 1; \  
+        echo "Error: ROCm directory does not exist."; \  
+        exit 1; \  
     fi  
 
 ARG ROCM_PATH=/opt/rocm-${ROCM_VERSION} 
@@ -177,4 +177,3 @@ FROM binary_build as clean_build
 RUN bazel clean --expunge --color=yes && \
     rm -rf /root/.cache
 CMD ["/bin/bash"]
-
