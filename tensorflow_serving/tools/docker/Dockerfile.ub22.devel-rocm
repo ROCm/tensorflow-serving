@@ -51,7 +51,6 @@ RUN if [ -n "$ROCM_BUILD_NUM" ] && [ -n "$ROCM_BUILD_NAME" ] && [ "$ROCM_URL" !=
         /custom_install.sh ${ROCM_VERSION} ${ROCM_BUILD_NAME} ${ROCM_BUILD_NUM}; \  
     else \
         apt update; \  
-        apt install -y rocm; \  
     fi 
 
 # Setup Python environment. PYTHON_VERSION is e.g. "python3.8"
