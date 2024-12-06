@@ -44,14 +44,15 @@ COPY setup_pining.sh /setup_pining.sh
 COPY custom_install.sh /custom_install.sh
 RUN /setup.rocm.sh $ROCM_VERSION jammy $ROCM_URL $ROCM_BUILD_NAME $ROCM_BUILD_NUM
 
-RUN if [ -n "$ROCM_BUILD_NUM" ] && [ -n "$ROCM_BUILD_NAME" ] && [ "$ROCM_URL" != "*repo.radeon.com*" ]; then \  
-        echo "Both ROCM_BUILD_NUM and ROCM_BUILD_NAME are set, and ROCM_URL does not contain repo.radeon.com/rocm."; \  
+RUN if [ -n "$ROCM_BUILD_NUM" ] && [ -n "$ROCM_BUILD_NAME" ]; then \  
+        echo "Both ROCM_BUILD_NUM and ROCM_BUILD_NAME are set."; \
         apt update -y; \  
         chmod +x /custom_install.sh; \  
         /custom_install.sh ${ROCM_VERSION} ${ROCM_BUILD_NAME} ${ROCM_BUILD_NUM}; \  
-    else \
+    else \  
         apt update; \  
-    fi 
+        apt install -y rocm; \
+    fi
 
 # Setup Python environment. PYTHON_VERSION is e.g. "python3.8"
 ARG PYTHON_VERSION=3.10
