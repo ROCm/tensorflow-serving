@@ -30,7 +30,7 @@ RUN /setup.packages.sh /builder.packages.txt
 
 # Install ROCM
 ARG ROCM_VERSION=6.2.0
-ARG ROCM_URL=https://repo.radeon.com/rocm/apt/6.3
+ARG ROCM_URL
 ARG ROCM_BUILD_NAME
 ARG ROCM_BUILD_NUM
 ARG CUSTOM_INSTALL
@@ -45,13 +45,13 @@ COPY custom_install.sh /custom_install.sh
 RUN /setup.rocm.sh $ROCM_VERSION jammy $ROCM_URL $ROCM_BUILD_NAME $ROCM_BUILD_NUM
 
 RUN if [ "$ROCM_URL" != *"repo.radeon.com"* ]; then \  
-        echo "Both ROCM_BUILD_NUM and ROCM_BUILD_NAME are set."; \
-        apt update -y; \  
-        chmod +x /custom_install.sh; \  
-        /custom_install.sh ${ROCM_VERSION} ${ROCM_BUILD_NAME} ${ROCM_BUILD_NUM}; \  
+        apt update -y; \
+        apt install -y rocm; \ 
     else \  
-        apt update; \  
-        apt install -y rocm; \
+        echo "Both ROCM_BUILD_NUM and ROCM_BUILD_NAME are set."; \
+        apt update -y; \
+        chmod +x /custom_install.sh; \
+        /custom_install.sh ${ROCM_VERSION} ${ROCM_BUILD_NAME} ${ROCM_BUILD_NUM}; \
     fi
 
 # Setup Python environment. PYTHON_VERSION is e.g. "python3.8"
