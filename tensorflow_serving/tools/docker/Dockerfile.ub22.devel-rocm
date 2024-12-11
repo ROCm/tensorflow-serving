@@ -50,10 +50,8 @@ RUN if [ "$ROCM_URL" != *"repo.radeon.com"* ]; then \
     else \  
         echo "Both ROCM_BUILD_NUM and ROCM_BUILD_NAME are set."; \
         apt update -y; \
-        chmod +x /custom_install.sh; \
-        /custom_install.sh ${ROCM_VERSION} ${ROCM_BUILD_NAME} ${ROCM_BUILD_NUM}; \
     fi
-    
+
 # Setup Python environment. PYTHON_VERSION is e.g. "python3.8"
 ARG PYTHON_VERSION=3.10
 COPY setup.build-python_ubuntu.sh /setup.build-python_ubuntu.sh

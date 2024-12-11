@@ -97,8 +97,13 @@ if [[ "$DISTRO" == "focal" ]] || [[ "$DISTRO" == "jammy" ]] || [[ "$DISTRO" == "
 	    echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg trusted=yes] $AMDGPU_DEB_REPO$ROCM_BUILD_NAME $DISTRO $ROCM_BUILD_NUM" | tee /etc/apt/sources.list.d/amdgpu.list
         echo -e 'Package: *\nPin: release o=repo.radeon.com\nPin-Priority: 600' | tee /etc/apt/preferences.d/rocm-pin-600  
     else  
-        echo "ROCM_URL does not contain repo.radeon.com"  
+        echo "ROCM_URL does not contain repo.radeon.com $ROCM_BUILD_NAME $ROCM_BUILD_NUM"  
         chmod +x /setup_pining.sh
+        chmod +x /custom_install.sh
+        /custom_install.sh ${ROCM_VERSION} ${ROCM_BUILD_NAME} ${ROCM_BUILD_NUM} ${DISTRO}
+        apt update -y
+        apt install -y rocm
+
     fi  
 
     apt-get update --allow-insecure-repositories
