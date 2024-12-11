@@ -44,18 +44,16 @@ COPY setup_pining.sh /setup_pining.sh
 COPY custom_install.sh /custom_install.sh
 RUN /setup.rocm.sh $ROCM_VERSION jammy $ROCM_URL $ROCM_BUILD_NAME $ROCM_BUILD_NUM
 
-RUN if [ -n "$ROCM_BUILD_NUM" ] && [ -n "$ROCM_BUILD_NAME" ]; then \  
-        echo "Both ROCM_BUILD_NUM and ROCM_BUILD_NAME are set."; \
-        apt update -y; \  
-        chmod +x /custom_install.sh; \  
-        /custom_install.sh ${ROCM_VERSION} ${ROCM_BUILD_NAME} ${ROCM_BUILD_NUM}; \  
+RUN if [ "$ROCM_URL" != *"repo.radeon.com"* ]; then \  
+        apt update -y; \
+        apt install -y rocm; \ 
     else \  
-        wget https://repo.radeon.com/amdgpu-install/6.2.4/ubuntu/jammy/amdgpu-install_6.2.60204-1_all.deb; \  
-        apt install -y ./amdgpu-install_6.2.60204-1_all.deb; \  
-        apt update; \  
-        apt install -y amdgpu-dkms rocm; \  
+        echo "Both ROCM_BUILD_NUM and ROCM_BUILD_NAME are set."; \
+        apt update -y; \
+        chmod +x /custom_install.sh; \
+        /custom_install.sh ${ROCM_VERSION} ${ROCM_BUILD_NAME} ${ROCM_BUILD_NUM}; \
     fi
-
+    
 # Setup Python environment. PYTHON_VERSION is e.g. "python3.8"
 ARG PYTHON_VERSION=3.10
 COPY setup.build-python_ubuntu.sh /setup.build-python_ubuntu.sh
