@@ -93,9 +93,9 @@ if [[ "$DISTRO" == "focal" ]] || [[ "$DISTRO" == "jammy" ]] || [[ "$DISTRO" == "
         mkdir --parents --mode=0755 /etc/apt/keyrings
         wget https://repo.radeon.com/rocm/rocm.gpg.key -O - | \
             gpg --dearmor | tee /etc/apt/keyrings/rocm.gpg > /dev/null
-         echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg trusted=yes] $ROCM_URL $DISTRO $ROCM_BUILD_NUM" | tee /etc/apt/sources.list.d/rocm.list
-	 echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg trusted=yes] $AMDGPU_DEB_REPO$ROCM_BUILD_NAME $DISTRO $ROCM_BUILD_NUM" | tee /etc/apt/sources.list.d/amdgpu.list
-         echo -e 'Package: *\nPin: release o=repo.radeon.com\nPin-Priority: 600' | tee /etc/apt/preferences.d/rocm-pin-600  
+        echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg trusted=yes] $ROCM_URL $DISTRO $ROCM_BUILD_NUM" | tee /etc/apt/sources.list.d/rocm.list
+	    echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg trusted=yes] $AMDGPU_DEB_REPO$ROCM_BUILD_NAME $DISTRO $ROCM_BUILD_NUM" | tee /etc/apt/sources.list.d/amdgpu.list
+        echo -e 'Package: *\nPin: release o=repo.radeon.com\nPin-Priority: 600' | tee /etc/apt/preferences.d/rocm-pin-600  
     else  
         echo "ROCM_URL does not contain repo.radeon.com"  
         chmod +x /setup_pining.sh
