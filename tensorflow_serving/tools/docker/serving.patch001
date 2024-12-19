@@ -1,25 +1,25 @@
-From 0c0d12a8279690c02ec6273021736127bf9ff25a Mon Sep 17 00:00:00 2001
+From 4e9d194c6e7d23a50149e1d13e584d97b28263a7 Mon Sep 17 00:00:00 2001
 From: Jason Furmanek <Jason.Furmanek@amd.com>
-Date: Wed, 21 Aug 2024 21:31:29 -0700
-Subject: [PATCH] Fix TF version bounding
+Date: Wed, 18 Dec 2024 13:20:19 -0600
+Subject: [PATCH] [PATCH] Fix TF version bounding
 
 ---
  tensorflow_serving/tools/pip_package/setup.py | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/tensorflow_serving/tools/pip_package/setup.py b/tensorflow_serving/tools/pip_package/setup.py
-index 8f9f9ce7..db3901a1 100644
+index 17b77764..58289bb0 100644
 --- a/tensorflow_serving/tools/pip_package/setup.py
 +++ b/tensorflow_serving/tools/pip_package/setup.py
 @@ -33,7 +33,7 @@ DOCLINES = __doc__.split('\n')
  # Set when releasing a new version of TensorFlow Serving (e.g. 1.0.0).
- _VERSION = '2.17.0'
+ _VERSION = '2.18.0'
  # Have this by default be open; releasing a new version will lock to TF version
--_TF_VERSION = '>=2.17.0,<3'
-+_TF_VERSION = '>=2.17.0,<2.18.0'
+-_TF_VERSION = '>=2.18.0,<3'
++_TF_VERSION = '>=2.18.0,<2.19.0'
  _TF_VERSION_SANITIZED = _TF_VERSION.replace('-', '')
  
  project_name = 'tensorflow-serving-api'
 -- 
-2.25.1
+2.34.1
 

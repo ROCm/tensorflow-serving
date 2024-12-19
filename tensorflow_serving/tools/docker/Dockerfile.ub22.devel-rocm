@@ -13,15 +13,15 @@
 # limitations under the License.
 FROM ubuntu:jammy as base_build
 
-# TF-serving 2.16.0
-ARG TF_SERVING_VERSION_GIT_BRANCH=r2.17
-ARG TF_SERVING_VERSION_GIT_COMMIT=6311b72ea7efdc8c306de3c3bc808388468b7a3d
+# TF-serving 2.18.0
+ARG TF_SERVING_VERSION_GIT_BRANCH=r2.18
+ARG TF_SERVING_VERSION_GIT_COMMIT=5815bfdd1d1bbd9d0d3557576c98f13afc4d9016
 
 LABEL maintainer=Jason.Furmanek@amd.com
 LABEL tensorflow_serving_github_branchtag=${TF_SERVING_VERSION_GIT_BRANCH}
 LABEL tensorflow_serving_github_commit=${TF_SERVING_VERSION_GIT_COMMIT}
 
-ARG GPU_DEVICE_TARGETS="gfx900 gfx906 gfx908 gfx90a gfx940 gfx941 gfx942 gfx1030 gfx1100"
+ARG GPU_DEVICE_TARGETS="gfx908 gfx90a gfx940 gfx941 gfx942 gfx1030 gfx1100"
 
 # Install build dependencies
 COPY setup.packages.sh setup.packages.sh
@@ -40,8 +40,6 @@ ENV ROCM_PATH=${ROCM_PATH}
 COPY ${CUSTOM_INSTALL} /${CUSTOM_INSTALL}
 COPY setup.rocm.sh /setup.rocm.sh
 COPY devel.packages.rocm.txt /devel.packages.rocm.txt
-COPY setup_pining.sh /setup_pining.sh
-COPY custom_install.sh /custom_install.sh
 RUN /setup.rocm.sh $ROCM_VERSION jammy $ROCM_URL $ROCM_BUILD_NAME $ROCM_BUILD_NUM
 
 RUN if [ -n "$ROCM_BUILD_NUM" ] && [ -n "$ROCM_BUILD_NAME" ]; then \  
@@ -49,21 +47,17 @@ RUN if [ -n "$ROCM_BUILD_NUM" ] && [ -n "$ROCM_BUILD_NAME" ]; then \
         apt update -y; \  
         chmod +x /custom_install.sh; \  
         /custom_install.sh ${ROCM_VERSION} ${ROCM_BUILD_NAME} ${ROCM_BUILD_NUM}; \  
-    else \  
-        wget https://repo.radeon.com/amdgpu-install/6.2.4/ubuntu/jammy/amdgpu-install_6.2.60204-1_all.deb; \  
-        apt install -y ./amdgpu-install_6.2.60204-1_all.deb; \  
-        apt update; \  
-        apt install -y amdgpu-dkms rocm; \  
     fi
 
 # Setup Python environment. PYTHON_VERSION is e.g. "python3.8"
 ARG PYTHON_VERSION=3.10
 COPY setup.build-python_ubuntu.sh /setup.build-python_ubuntu.sh
+RUN echo "Build Python+reqs"
 COPY devel.requirements.txt /devel.requirements.txt
 RUN /setup.build-python_ubuntu.sh $PYTHON_VERSION devel.requirements.txt
 
 # Set up Bazel
-ENV BAZEL_VERSION 6.4.0
+ENV BAZEL_VERSION 6.5.0
 WORKDIR /
 RUN mkdir /bazel && \
     cd /bazel && \
@@ -109,9 +103,12 @@ ARG ROCM_PATH=/opt/rocm-${ROCM_VERSION}
 
 # Download tensorflow-rocm for org_tensorflow override
 ENV ROCM_TF_FORK_REPO="https://github.com/ROCmSoftwarePlatform/tensorflow-upstream"
-ENV ROCM_TF_FORK_BRANCH="r2.17-rocm-enhanced"
+ENV ROCM_TF_FORK_BRANCH="r2.18-rocm-enhanced"
 RUN rm -rf /tmp/tensorflow-upstream || true && \
     git clone -b ${ROCM_TF_FORK_BRANCH} ${ROCM_TF_FORK_REPO} /tmp/tensorflow-upstream
+COPY tensorflow.patch001 /tmp/tensorflow-upstream
+RUN cd /tmp/tensorflow-upstream && patch -p1 < tensorflow.patch001 && \
+    cd -
 
 RUN ls -la ${ROCM_PATH}
 
