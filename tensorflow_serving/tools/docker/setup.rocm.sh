@@ -25,8 +25,8 @@
 set -x
 
 # Get arguments (or defaults)
-ROCM_VERSION=6.1.0
-DISTRO=focal
+ROCM_VERSION=6.3.0
+DISTRO=jammy
 ROCM_REPO=https://repo.radeon.com/rocm/*
 if [[ -n $1 ]]; then
     ROCM_VERSION=$1
@@ -94,7 +94,7 @@ if [[ "$DISTRO" == "focal" ]] || [[ "$DISTRO" == "jammy" ]] || [[ "$DISTRO" == "
         wget https://repo.radeon.com/rocm/rocm.gpg.key -O - | \
             gpg --dearmor | tee /etc/apt/keyrings/rocm.gpg > /dev/null
          echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg trusted=yes] $ROCM_URL $DISTRO $ROCM_BUILD_NUM" | tee /etc/apt/sources.list.d/rocm.list
-	 echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg trusted=yes] $AMDGPU_DEB_REPO$ROCM_BUILD_NAME $DISTRO $ROCM_BUILD_NUM" | tee /etc/apt/sources.list.d/amdgpu.list
+	 echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg trusted=yes] $AMDGPU_DEB_REPO/ubuntu $ROCM_BUILD_NAME $ROCM_BUILD_NUM" | tee /etc/apt/sources.list.d/amdgpu.list
          echo -e 'Package: *\nPin: release o=repo.radeon.com\nPin-Priority: 600' | tee /etc/apt/preferences.d/rocm-pin-600  
     else  
         echo "ROCM_URL does not contain repo.radeon.com"  
