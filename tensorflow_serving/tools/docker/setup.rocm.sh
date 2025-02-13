@@ -95,30 +95,31 @@ if [[ "$DISTRO" == "focal" ]] || [[ "$DISTRO" == "jammy" ]] || [[ "$DISTRO" == "
             gpg --dearmor | tee /etc/apt/keyrings/rocm.gpg > /dev/null
         echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg trusted=yes] $ROCM_URL $DISTRO $ROCM_BUILD_NUM" | tee /etc/apt/sources.list.d/rocm.list
 	    echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg trusted=yes] $AMDGPU_DEB_REPO$ROCM_BUILD_NAME $DISTRO $ROCM_BUILD_NUM" | tee /etc/apt/sources.list.d/amdgpu.list
-        echo -e 'Package: *\nPin: release o=repo.radeon.com\nPin-Priority: 600' | tee /etc/apt/preferences.d/rocm-pin-600  
+        echo -e 'Package: *\nPin: release o=repo.radeon.com\nPin-Priority: 600' | tee /etc/apt/preferences.d/rocm-pin-600
+
+        apt-get update --allow-insecure-repositories
+
+        wget -qO - https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+        echo "deb [arch=amd64 trusted=yes] http://apt.llvm.org/$DISTRO/ llvm-toolchain-$DISTRO-18 main" | tee /etc/apt/sources.list.d/llvm.list
+        apt-get update --allow-insecure-repositories
+
+        # install rocm
+        /setup.packages.sh /devel.packages.rocm.txt
+
+        MIOPENKERNELS=$( \
+                            apt-cache search --names-only miopen-hip-gfx | \
+                            awk '{print $1}' | \
+                            grep -F -v . || \
+                    true )
+        DEBIAN_FRONTEND=noninteractive apt-get install -y --allow-unauthenticated ${MIOPENKERNELS}
+
+        #install hipblasLT if available
+        DEBIAN_FRONTEND=noninteractive apt-get install -y --allow-unauthenticated hipblaslt-dev || true
+    
     else  
         echo "ROCM_URL does not contain repo.radeon.com"  
         chmod +x /setup_pining.sh
     fi  
-
-    apt-get update --allow-insecure-repositories
-
-    wget -qO - https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
-    echo "deb [arch=amd64 trusted=yes] http://apt.llvm.org/$DISTRO/ llvm-toolchain-$DISTRO-18 main" | tee /etc/apt/sources.list.d/llvm.list
-    apt-get update --allow-insecure-repositories
-
-    # install rocm
-    /setup.packages.sh /devel.packages.rocm.txt
-
-    MIOPENKERNELS=$( \
-                        apt-cache search --names-only miopen-hip-gfx | \
-                        awk '{print $1}' | \
-                        grep -F -v . || \
-		        true )
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --allow-unauthenticated ${MIOPENKERNELS}
-
-    #install hipblasLT if available
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --allow-unauthenticated hipblaslt-dev || true
 
 elif [[ "$DISTRO" == "el7" ]]; then
     echo -e "[ROCm]\nname=ROCm\nbaseurl=$ROCM_URL\nenabled=1\ngpgcheck=0" >>/etc/yum.repos.d/rocm.repo
