@@ -29,7 +29,7 @@ COPY builder.packages.txt builder.packages.txt
 RUN /setup.packages.sh /builder.packages.txt
 
 # Install ROCM
-ARG ROCM_VERSION=6.2.0
+ARG ROCM_VERSION=6.3.0
 ARG ROCM_URL
 ARG ROCM_BUILD_NAME
 ARG ROCM_BUILD_NUM
@@ -71,13 +71,7 @@ RUN mkdir /bazel && \
 # Build TensorFlow with the ROCm configuration
 ENV CI_BUILD_PYTHON python
 
-ENV HCC_HOME=$ROCM_PATH/hcc
-ENV HIP_PATH=$ROCM_PATH/hip
-ENV OPENCL_ROOT=$ROCM_PATH/opencl
-ENV PATH="$HCC_HOME/bin:$HIP_PATH/bin:${PATH}"
 ENV PATH="$ROCM_PATH/bin:${PATH}"
-ENV PATH="$OPENCL_ROOT/bin:${PATH}"
-
 
 # Set TMP for nvidia build environment
 ENV TMP="/tmp"
