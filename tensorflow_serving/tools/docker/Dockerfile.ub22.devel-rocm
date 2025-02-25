@@ -29,19 +29,19 @@ COPY builder.packages.txt builder.packages.txt
 RUN /setup.packages.sh /builder.packages.txt
 
 # Install ROCM
-ARG ROCM_VERSION=6.2.0
+ARG ROCM_VERSION=6.3.0
 ARG ROCM_URL
 ARG ROCM_BUILD_NAME
 ARG ROCM_BUILD_NUM
 ARG CUSTOM_INSTALL
+ARG SETUP_PINNING
 ENV ROCM_VERSION=${ROCM_VERSION}
 ARG ROCM_PATH=/opt/rocm-${ROCM_VERSION}
 ENV ROCM_PATH=${ROCM_PATH}
 COPY ${CUSTOM_INSTALL} /${CUSTOM_INSTALL}
 COPY setup.rocm.sh /setup.rocm.sh
 COPY devel.packages.rocm.txt /devel.packages.rocm.txt
-COPY setup_pining.sh /setup_pining.sh
-COPY custom_install.sh /custom_install.sh
+COPY ${SETUP_PINNING} /${SETUP_PINNING}
 RUN /setup.rocm.sh $ROCM_VERSION jammy $ROCM_URL $ROCM_BUILD_NAME $ROCM_BUILD_NUM
 
 RUN if [ -n "$ROCM_BUILD_NUM" ] && [ -n "$ROCM_BUILD_NAME" ]; then \  
@@ -49,11 +49,6 @@ RUN if [ -n "$ROCM_BUILD_NUM" ] && [ -n "$ROCM_BUILD_NAME" ]; then \
         apt update -y; \  
         chmod +x /custom_install.sh; \  
         /custom_install.sh ${ROCM_VERSION} ${ROCM_BUILD_NAME} ${ROCM_BUILD_NUM}; \  
-    else \  
-        wget https://repo.radeon.com/amdgpu-install/6.2.4/ubuntu/jammy/amdgpu-install_6.2.60204-1_all.deb; \  
-        apt install -y ./amdgpu-install_6.2.60204-1_all.deb; \  
-        apt update; \  
-        apt install -y amdgpu-dkms rocm; \  
     fi
 
 # Setup Python environment. PYTHON_VERSION is e.g. "python3.8"
@@ -77,13 +72,7 @@ RUN mkdir /bazel && \
 # Build TensorFlow with the ROCm configuration
 ENV CI_BUILD_PYTHON python
 
-ENV HCC_HOME=$ROCM_PATH/hcc
-ENV HIP_PATH=$ROCM_PATH/hip
-ENV OPENCL_ROOT=$ROCM_PATH/opencl
-ENV PATH="$HCC_HOME/bin:$HIP_PATH/bin:${PATH}"
 ENV PATH="$ROCM_PATH/bin:${PATH}"
-ENV PATH="$OPENCL_ROOT/bin:${PATH}"
-
 
 # Set TMP for nvidia build environment
 ENV TMP="/tmp"
