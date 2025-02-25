@@ -94,7 +94,6 @@ if [[ "$DISTRO" == "focal" ]] || [[ "$DISTRO" == "jammy" ]] || [[ "$DISTRO" == "
         wget https://repo.radeon.com/rocm/rocm.gpg.key -O - | \
             gpg --dearmor | tee /etc/apt/keyrings/rocm.gpg > /dev/null
          echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg trusted=yes] $ROCM_URL $DISTRO $ROCM_BUILD_NUM" | tee /etc/apt/sources.list.d/rocm.list
-	 echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg trusted=yes] $AMDGPU_DEB_REPO$ROCM_BUILD_NAME $DISTRO $ROCM_BUILD_NUM" | tee /etc/apt/sources.list.d/amdgpu.list
          echo -e 'Package: *\nPin: release o=repo.radeon.com\nPin-Priority: 600' | tee /etc/apt/preferences.d/rocm-pin-600  
     else  
         echo "ROCM_URL does not contain repo.radeon.com"  
@@ -122,7 +121,6 @@ if [[ "$DISTRO" == "focal" ]] || [[ "$DISTRO" == "jammy" ]] || [[ "$DISTRO" == "
 
 elif [[ "$DISTRO" == "el7" ]]; then
     echo -e "[ROCm]\nname=ROCm\nbaseurl=$ROCM_URL\nenabled=1\ngpgcheck=0" >>/etc/yum.repos.d/rocm.repo
-    echo -e "[amdgpu]\nname=amdgpu\nbaseurl=https://repo.radeon.com/amdgpu/${ROCM_VERS}/rhel/7/main/x86_64/\nenabled=1\ngpgcheck=0" >>/etc/yum.repos.d/amdgpu.repo
     yum clean all
 
     # install rocm
@@ -133,7 +131,6 @@ elif [[ "$DISTRO" == "el7" ]]; then
 
 elif [[ "$DISTRO" == "el8" ]]; then
     echo -e "[ROCm]\nname=ROCm\nbaseurl=$ROCM_URL\nenabled=1\ngpgcheck=1\ngpgkey=https://repo.radeon.com/rocm/rocm.gpg.key" >>/etc/yum.repos.d/rocm.repo
-    echo -e "[amdgpu]\nname=amdgpu\nbaseurl=https://repo.radeon.com/amdgpu/${ROCM_VERS}/rhel/8.8/main/x86_64/\nenabled=1\ngpgcheck=1\ngpgkey=https://repo.radeon.com/rocm/rocm.gpg.key" >>/etc/yum.repos.d/amdgpu.repo
     dnf clean all
 
     # install rocm
