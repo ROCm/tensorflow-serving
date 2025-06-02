@@ -13,9 +13,9 @@
 # limitations under the License.
 FROM ubuntu:jammy as base_build
 
-# TF-serving 2.18.0
+# TF-serving 2.19.0
 ARG TF_SERVING_VERSION_GIT_BRANCH=r2.18
-ARG TF_SERVING_VERSION_GIT_COMMIT=5815bfdd1d1bbd9d0d3557576c98f13afc4d9016
+ARG TF_SERVING_VERSION_GIT_COMMIT=c491ba6554e4ea41cd4ae0eba9012b762fb2b455
 
 LABEL maintainer=Jason.Furmanek@amd.com
 LABEL tensorflow_serving_github_branchtag=${TF_SERVING_VERSION_GIT_BRANCH}
@@ -29,7 +29,7 @@ COPY builder.packages.txt builder.packages.txt
 RUN /setup.packages.sh /builder.packages.txt
 
 # Install ROCM
-ARG ROCM_VERSION=6.3.0
+ARG ROCM_VERSION=6.4.0
 ARG ROCM_URL
 ARG ROCM_BUILD_NAME
 ARG ROCM_BUILD_NUM
@@ -97,7 +97,7 @@ ARG ROCM_PATH=/opt/rocm-${ROCM_VERSION}
 
 # Download tensorflow-rocm for org_tensorflow override
 ENV ROCM_TF_FORK_REPO="https://github.com/ROCmSoftwarePlatform/tensorflow-upstream"
-ENV ROCM_TF_FORK_BRANCH="r2.18-rocm-enhanced"
+ENV ROCM_TF_FORK_BRANCH="r2.19-rocm-enhanced"
 RUN rm -rf /tmp/tensorflow-upstream || true && \
     git clone -b ${ROCM_TF_FORK_BRANCH} ${ROCM_TF_FORK_REPO} /tmp/tensorflow-upstream
 COPY tensorflow.patch001 /tmp/tensorflow-upstream

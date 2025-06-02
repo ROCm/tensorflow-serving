@@ -2,7 +2,7 @@
 
 #TF_REPO="https://pypi.org"
 TF_REPO="https://repo.radeon.com/rocm/manylinux/rocm-rel-6.2/"
-TF_VERS_TO_POST_INSTALL="2.18.0"
+TF_VERS_TO_POST_INSTALL="2.19.0"
 TF_VERS_SUBSCRIPT=$( \
                     basename $ROCM_PATH | \
                     cut -d "-" -f2 | \

@@ -25,7 +25,7 @@
 set -x
 
 # Get arguments (or defaults)
-ROCM_VERSION=6.2.0
+ROCM_VERSION=6.4.0
 DISTRO=jammy
 ROCM_REPO=https://repo.radeon.com/rocm/*
 if [[ -n $1 ]]; then

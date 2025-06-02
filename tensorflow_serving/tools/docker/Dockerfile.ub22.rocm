@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ARG TF_SERVING_VERSION=latest
+ARG TF_SERVING_VERSION=2.19
 ARG TF_SERVING_BUILD_IMAGE=rocm/tensorflow-serving:${TF_SERVING_VERSION}-devel
 
 FROM ${TF_SERVING_BUILD_IMAGE} as build_image
@@ -32,7 +32,7 @@ COPY builder.packages.txt builder.packages.txt
 RUN /setup.packages.sh /builder.packages.txt
 
 # Install ROCM
-ARG ROCM_VERSION=6.2.0
+ARG ROCM_VERSION=6.4.0
 ARG CUSTOM_INSTALL
 ARG ROCM_PATH=/opt/rocm-${ROCM_VERSION}
 ENV ROCM_PATH=${ROCM_PATH}
