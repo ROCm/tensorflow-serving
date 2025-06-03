@@ -101,8 +101,8 @@ ENV ROCM_TF_FORK_BRANCH="r2.19-rocm-enhanced"
 RUN rm -rf /tmp/tensorflow-upstream || true && \
     git clone -b ${ROCM_TF_FORK_BRANCH} ${ROCM_TF_FORK_REPO} /tmp/tensorflow-upstream
 COPY tensorflow.patch001 /tmp/tensorflow-upstream
-RUN cd /tmp/tensorflow-upstream && patch -p1 < tensorflow.patch001 && \
-    cd -
+#RUN cd /tmp/tensorflow-upstream && patch -p1 < tensorflow.patch001 && \
+#    cd -
 
 RUN ls -la ${ROCM_PATH}
 
