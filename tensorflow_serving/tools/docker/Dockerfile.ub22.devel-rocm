@@ -101,8 +101,8 @@ ENV ROCM_TF_FORK_BRANCH="r2.19-rocm-enhanced"
 RUN rm -rf /tmp/tensorflow-upstream || true && \
     git clone -b ${ROCM_TF_FORK_BRANCH} ${ROCM_TF_FORK_REPO} /tmp/tensorflow-upstream
 COPY tensorflow.patch001 /tmp/tensorflow-upstream
-#RUN cd /tmp/tensorflow-upstream && patch -p1 < tensorflow.patch001 && \
-#    cd -
+RUN cd /tmp/tensorflow-upstream && patch -p1 < tensorflow.patch001 && \
+    cd -
 
 RUN ls -la ${ROCM_PATH}
 
@@ -120,10 +120,12 @@ ENV ROCM_PATH=${ROCM_PATH}
 ENV ROCM_VERSION=${ROCM_VERSION}
 
 RUN ROCM=$(ls -d /opt/rocm-*) && \
-    bazel build --color=yes --curses=yes --copt="-fPIC"\
+    bazel build --config=rocm --color=yes --curses=yes --copt="-fPIC"\
     --override_repository=org_tensorflow=/tmp/tensorflow-upstream \
     --crosstool_top=@local_config_rocm//crosstool:toolchain \
     --define=using_rocm_hipcc=true \
+    --define=xnn_enable_avxvnniint8=false \
+    --define=xnn_enable_avx512fp16=false \
     --define=tensorflow_mkldnn_contraction_kernel=0 \
     --repo_env TF_NEED_ROCM=1 \
     ${TF_SERVING_BAZEL_OPTIONS} \
@@ -131,6 +133,12 @@ RUN ROCM=$(ls -d /opt/rocm-*) && \
     --output_filter=DONT_MATCH_ANYTHING \
     --action_env ROCM_PATH=$ROCM \
     --action_env=TF_PYTHON_VERSION=$PYTHON_VERSION \
+    --action_env=CLANG_COMPILER_PATH="/usr/lib/llvm-18/bin/clang" \
+    --action_env=TF_ROCM_CLANG="1" \
+    --action_env=HIPCC_COMPILE_FLAGS_APPEND="--offload-compress" \
+    --linkopt="-fuse-ld=lld" \
+    --host_linkopt="-fuse-ld=lld" \
+    --linkopt=-Wl,--undefined-version \
     ${TF_SERVING_BUILD_OPTIONS} \
     --copt=-Wno-stringop-truncation \
     tensorflow_serving/model_servers:tensorflow_model_server && \
@@ -139,16 +147,25 @@ RUN ROCM=$(ls -d /opt/rocm-*) && \
 
 # Build and install TensorFlow Serving API
 RUN ROCM=$(ls -d /opt/rocm-*) && \
-    bazel build --color=yes --curses=yes \
+    bazel build --config=rocm --color=yes --curses=yes \
     --override_repository=org_tensorflow=/tmp/tensorflow-upstream \
     --crosstool_top=@local_config_rocm//crosstool:toolchain \
     --define=using_rocm_hipcc=true \
+    --define=xnn_enable_avxvnniint8=false \
+    --define=xnn_enable_avx512fp16=false \
     --define=tensorflow_mkldnn_contraction_kernel=0 \
     --repo_env TF_NEED_ROCM=1 \
     ${TF_SERVING_BAZEL_OPTIONS} \
     --verbose_failures \
     --output_filter=DONT_MATCH_ANYTHING \
     --action_env ROCM_PATH=$ROCM \
+    --action_env=TF_PYTHON_VERSION=$PYTHON_VERSION \
+    --action_env=CLANG_COMPILER_PATH="/usr/lib/llvm-18/bin/clang" \
+    --action_env=TF_ROCM_CLANG="1" \
+    --action_env=HIPCC_COMPILE_FLAGS_APPEND="--offload-compress" \
+    --linkopt="-fuse-ld=lld" \
+    --host_linkopt="-fuse-ld=lld" \
+    --linkopt=-Wl,--undefined-version \
     ${TF_SERVING_BUILD_OPTIONS} \
     tensorflow_serving/tools/pip_package:build_pip_package && \
     bazel-bin/tensorflow_serving/tools/pip_package/build_pip_package \

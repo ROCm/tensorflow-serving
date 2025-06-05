@@ -1,47 +1,23 @@
-From debc66cdcd4ca1a50c912b274244b1be5d5533c1 Mon Sep 17 00:00:00 2001
-From: root <root@smc300x-clt-r4c6-18.cs-clt.dcgpu>
-Date: Thu, 19 Dec 2024 18:35:11 +0000
-Subject: [PATCH] Turn off cholesky
+From 2d7ff04aac47816a7cf19ce5612b47929f0b6a0a Mon Sep 17 00:00:00 2001
+From: Jason Furmanek <Jason.Furmanek@amd.com>
+Date: Wed, 4 Jun 2025 22:42:28 +0000
+Subject: [PATCH] tf patch
 
 ---
- tensorflow/core/kernels/linalg/BUILD | 11 -----------
- 1 file changed, 11 deletions(-)
+ tensorflow/tools/toolchains/python/python_repo.bzl | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/tensorflow/core/kernels/linalg/BUILD b/tensorflow/core/kernels/linalg/BUILD
-index 79c58634be6..6ae531bf4bd 100644
---- a/tensorflow/core/kernels/linalg/BUILD
-+++ b/tensorflow/core/kernels/linalg/BUILD
-@@ -27,7 +27,6 @@ package_group(
+diff --git a/tensorflow/tools/toolchains/python/python_repo.bzl b/tensorflow/tools/toolchains/python/python_repo.bzl
+index d733c3b23d3..8bbcaa3df79 100644
+--- a/tensorflow/tools/toolchains/python/python_repo.bzl
++++ b/tensorflow/tools/toolchains/python/python_repo.bzl
+@@ -23,6 +23,7 @@ HERMETIC_PYTHON_VERSION = "{}"
+ WHEEL_NAME = "{}"
+ WHEEL_COLLAB = "{}"
+ OUTPUT_PATH = "{}"
++USE_PYWRAP_RULES = "False"
+ """
 
- # Export a few files for use on Android.
- exports_files([
--    "cholesky_op.cc",
-     "determinant_op.cc",
-     "einsum_op_impl_half.cc",
-     "einsum_op_impl_bfloat16.cc",
-@@ -66,7 +65,6 @@ cc_library(
-     deps = [
-         ":banded_triangular_solve_op",
-         ":cholesky_grad",
--        ":cholesky_op",
-         ":determinant_op",
-         ":eig_op",
-         ":einsum_op",
-@@ -124,15 +122,6 @@ tf_kernel_library(
-     deps = LINALG_DEPS + [":matrix_diag_op"],
- )
-
--tf_kernel_library(
--    name = "cholesky_op",
--    gpu_deps = ["//tensorflow/core/platform:stream_executor"],
--    prefix = "cholesky_op",
--    deps = if_cuda_or_rocm([
--        ":matrix_band_part_op",
--    ]) + LINALG_DEPS,
--)
--
- tf_kernel_library(
-     name = "cholesky_grad",
-     prefix = "cholesky_grad",
+ def _python_repository_impl(repository_ctx):
 --
 2.34.1
