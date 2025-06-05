@@ -1,12 +1,42 @@
-From 4e9d194c6e7d23a50149e1d13e584d97b28263a7 Mon Sep 17 00:00:00 2001
+From b53a966702d6bab36db7a17d73c026902da2bb8d Mon Sep 17 00:00:00 2001
 From: Jason Furmanek <Jason.Furmanek@amd.com>
-Date: Wed, 18 Dec 2024 13:20:19 -0600
-Subject: [PATCH] [PATCH] Fix TF version bounding
+Date: Thu, 5 Jun 2025 08:03:40 -0700
+Subject: [PATCH] Patch for Serving
 
 ---
- tensorflow_serving/tools/pip_package/setup.py | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ .bazelrc                                      | 18 ++++++++++++++++++
+ tensorflow_serving/tools/pip_package/setup.py |  2 +-
+ 2 files changed, 19 insertions(+), 1 deletion(-)
 
+diff --git a/.bazelrc b/.bazelrc
+index eb2a873f..a1f5a4fd 100644
+--- a/.bazelrc
++++ b/.bazelrc
+@@ -25,6 +25,24 @@ build:cuda_clang --action_env=CLANG_CUDA_COMPILER_PATH="/usr/lib/llvm-17/bin/cla
+ build:kokoro --repo_env=CC="/usr/bin/gcc-10"
+ build:kokoro --action_env=CC="/usr/bin/gcc-10"
+ 
++# Options used to build with ROCM clang
++build:rocm_base --crosstool_top=@local_config_rocm//crosstool:toolchain
++build:rocm_base --define=using_rocm_hipcc=true
++build:rocm_base --define=tensorflow_mkldnn_contraction_kernel=0
++build:rocm_base --define=xnn_enable_avxvnniint8=false
++build:rocm_base --define=xnn_enable_avx512fp16=false
++build:rocm_base --repo_env TF_NEED_ROCM=1
++
++build:rocm --config=rocm_base
++build:rocm --action_env=CLANG_CUDA_COMPILER_PATH="/usr/lib/llvm-18/bin/clang"
++build:rocm --action_env=TF_ROCM_CLANG="1"
++build:rocm --action_env=HIPCC_COMPILE_FLAGS_APPEND="--offload-compress"
++build:rocm --linkopt="-fuse-ld=lld"
++build:rocm --host_linkopt="-fuse-ld=lld"
++# We have some invalid linker scripts in the build,
++# so we need to disable this check
++build:rocm --linkopt=-Wl,--undefined-version
++
+ # Options used to build with TPU support.
+ build:tpu --define=with_tpu_support=true --define=framework_shared_object=false
+ build:tpu --copt=-DLIBTPU_ON_GCE
 diff --git a/tensorflow_serving/tools/pip_package/setup.py b/tensorflow_serving/tools/pip_package/setup.py
 index 17b77764..58289bb0 100644
 --- a/tensorflow_serving/tools/pip_package/setup.py
@@ -21,5 +51,5 @@ index 17b77764..58289bb0 100644
  
  project_name = 'tensorflow-serving-api'
 -- 
-2.34.1
+2.25.1
 
