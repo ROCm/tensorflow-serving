@@ -1,12 +1,42 @@
-From 2420e3a9d0fac737d245f5a1595b1dbcbe548a21 Mon Sep 17 00:00:00 2001
+From def0529adcd398226bd1b45c258327136f5faf82 Mon Sep 17 00:00:00 2001
 From: Jason Furmanek <Jason.Furmanek@amd.com>
-Date: Mon, 2 Jun 2025 16:54:27 -0700
+Date: Wed, 4 Jun 2025 15:12:40 -0700
 Subject: [PATCH] patch for serving
 
 ---
- tensorflow_serving/tools/pip_package/setup.py | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ .bazelrc                                      | 18 ++++++++++++++++++
+ tensorflow_serving/tools/pip_package/setup.py |  2 +-
+ 2 files changed, 19 insertions(+), 1 deletion(-)
 
+diff --git a/.bazelrc b/.bazelrc
+index b77d460f..1bd85a2e 100644
+--- a/.bazelrc
++++ b/.bazelrc
+@@ -25,6 +25,24 @@ build:cuda_clang --action_env=CLANG_CUDA_COMPILER_PATH="/usr/lib/llvm-17/bin/cla
+ build:kokoro --repo_env=CC="/usr/bin/gcc-10"
+ build:kokoro --action_env=CC="/usr/bin/gcc-10"
+ 
++# Options used for ROCM build
++build:rocm_base --crosstool_top=@local_config_rocm//crosstool:toolchain
++build:rocm_base --define=using_rocm_hipcc=true
++build:rocm_base --define=tensorflow_mkldnn_contraction_kernel=0
++build:rocm_base --define=xnn_enable_avxvnniint8=false
++build:rocm_base --define=xnn_enable_avx512fp16=false
++build:rocm_base --repo_env TF_NEED_ROCM=1
++
++build:rocm --config=rocm_base
++build:rocm --action_env=CLANG_CUDA_COMPILER_PATH="/usr/lib/llvm-18/bin/clang"
++build:rocm --action_env=TF_ROCM_CLANG="1"
++build:rocm --action_env=HIPCC_COMPILE_FLAGS_APPEND="--offload-compress"
++build:rocm --linkopt="-fuse-ld=lld"
++build:rocm --host_linkopt="-fuse-ld=lld"
++# We have some invalid linker scripts in the build,
++# so we need to disable this check
++build:rocm --linkopt=-Wl,--undefined-version
++
+ # Options used to build with TPU support.
+ build:tpu --define=with_tpu_support=true --define=framework_shared_object=false
+ build:tpu --copt=-DLIBTPU_ON_GCE
 diff --git a/tensorflow_serving/tools/pip_package/setup.py b/tensorflow_serving/tools/pip_package/setup.py
 index 89d03326..bfa44bbf 100644
 --- a/tensorflow_serving/tools/pip_package/setup.py
